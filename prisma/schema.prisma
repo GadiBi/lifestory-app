@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  profile    Profile?
+  lifeEvents LifeEvent[]
+  interviews Interview[]
+}
+
+model Profile {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName  String?
+  birthDate DateTime?
+  birthPlace String?
+  updatedAt DateTime  @updatedAt
+}
+
+model LifeEvent {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  date        DateTime?
+  period      String?   // e.g., "childhood", "college years"
+  category    String?   // e.g., "family", "career", "milestone"
+  emotions    String?   // Associated feelings
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  interviewId String?
+  interview   Interview? @relation(fields: [interviewId], references: [id])
+}
+
+model Interview {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentPeriod   String   // Where in life timeline we are
+  conversationLog String   // JSON string for conversation history
+  status          String   @default("active") // active, paused, completed
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  extractedEvents LifeEvent[]
+}
