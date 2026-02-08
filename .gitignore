@@ -55,3 +55,5 @@ next-env.d.ts
 .vscode/
 *.swp
 *.swo
+nul
+dev.db

@@ -41,7 +41,27 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { fullName, birthDate, birthPlace } = await request.json();
+    const { username, fullName, birthDate, birthPlace, language } = await request.json();
+
+    // Check if username is being changed and if it's already taken
+    if (username) {
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          username: username,
+          NOT: { id: session.user.id },
+        },
+      });
+
+      if (existingUser) {
+        return NextResponse.json({ error: 'Username already taken' }, { status: 400 });
+      }
+
+      // Update username
+      await prisma.user.update({
+        where: { id: session.user.id },
+        data: { username },
+      });
+    }
 
     const profile = await prisma.profile.upsert({
       where: { userId: session.user.id },
@@ -49,16 +69,18 @@ export async function PUT(request: Request) {
         fullName,
         birthDate: birthDate ? new Date(birthDate) : null,
         birthPlace,
+        language: language || 'en',
       },
       create: {
         userId: session.user.id,
         fullName,
         birthDate: birthDate ? new Date(birthDate) : null,
         birthPlace,
+        language: language || 'en',
       },
     });
 
-    return NextResponse.json({ profile });
+    return NextResponse.json({ profile, username });
   } catch (error) {
     console.error('Profile PUT error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -9,6 +9,7 @@ interface Profile {
   fullName: string | null;
   birthDate: string | null;
   birthPlace: string | null;
+  language: string | null;
 }
 
 interface UserData {
@@ -18,40 +19,61 @@ interface UserData {
   profile: Profile | null;
 }
 
+interface UsageData {
+  totals: { inputTokens: number; outputTokens: number; totalTokens: number; totalCost: number; requestCount: number };
+  byEndpoint: Record<string, { requests: number; cost: number; tokens: number }>;
+}
+
+const languages = [
+  { code: 'en', label: 'English' },
+  { code: 'es', label: 'Spanish' },
+  { code: 'fr', label: 'French' },
+  { code: 'de', label: 'German' },
+  { code: 'he', label: 'Hebrew' },
+  { code: 'ru', label: 'Russian' },
+  { code: 'zh', label: 'Chinese' },
+  { code: 'ja', label: 'Japanese' },
+];
+
 export default function ProfilePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [usage, setUsage] = useState<UsageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
-
+  const [username, setUsername] = useState('');
   const [fullName, setFullName] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [birthPlace, setBirthPlace] = useState('');
+  const [language, setLanguage] = useState('en');
+  const [usernameError, setUsernameError] = useState('');
 
   useEffect(() => {
     if (status === 'loading') return;
-    if (!session) {
-      router.push('/login');
-      return;
-    }
-
-    fetchProfile();
+    if (!session) { router.push('/login'); return; }
+    fetchData();
   }, [session, status, router]);
 
-  async function fetchProfile() {
+  async function fetchData() {
     try {
-      const response = await fetch('/api/profile');
-      const data = await response.json();
+      const [profileRes, usageRes] = await Promise.all([
+        fetch('/api/profile'),
+        fetch('/api/usage'),
+      ]);
+      const profileData = await profileRes.json();
+      const usageData = await usageRes.json();
 
-      setUserData(data);
-      setFullName(data.profile?.fullName || '');
-      setBirthDate(data.profile?.birthDate ? data.profile.birthDate.split('T')[0] : '');
-      setBirthPlace(data.profile?.birthPlace || '');
+      setUserData(profileData);
+      setUsage(usageData);
+      setUsername(profileData.username || '');
+      setFullName(profileData.profile?.fullName || '');
+      setBirthDate(profileData.profile?.birthDate ? profileData.profile.birthDate.split('T')[0] : '');
+      setBirthPlace(profileData.profile?.birthPlace || '');
+      setLanguage(profileData.profile?.language || 'en');
     } catch (error) {
-      console.error('Failed to fetch profile:', error);
+      console.error('Failed to fetch:', error);
     } finally {
       setLoading(false);
     }
@@ -61,139 +83,139 @@ export default function ProfilePage() {
     e.preventDefault();
     setSaving(true);
     setSuccess(false);
+    setUsernameError('');
 
     try {
       const response = await fetch('/api/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fullName: fullName || null,
-          birthDate: birthDate || null,
-          birthPlace: birthPlace || null,
-        }),
+        body: JSON.stringify({ username, fullName: fullName || null, birthDate: birthDate || null, birthPlace: birthPlace || null, language }),
       });
-
+      const data = await response.json();
       if (response.ok) {
         setSuccess(true);
         setTimeout(() => setSuccess(false), 3000);
+      } else if (data.error === 'Username already taken') {
+        setUsernameError('Username taken');
       }
     } catch (error) {
-      console.error('Failed to update profile:', error);
+      console.error('Failed to update:', error);
     } finally {
       setSaving(false);
     }
   }
 
+  const formatCost = (cost: number) => cost < 0.01 ? `$${cost.toFixed(4)}` : `$${cost.toFixed(2)}`;
+  const formatTokens = (tokens: number) => tokens >= 1000000 ? `${(tokens / 1000000).toFixed(1)}M` : tokens >= 1000 ? `${(tokens / 1000).toFixed(0)}K` : tokens.toString();
+
   if (status === 'loading' || loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-slate-600">Loading...</div>
-      </div>
-    );
+    return <div className="min-h-screen bg-slate-50 flex items-center justify-center"><div className="text-slate-600">Loading...</div></div>;
   }
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Link href="/dashboard" className="text-slate-600 hover:text-slate-900">
+          <Link href="/dashboard" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          <h1 className="text-xl font-bold text-slate-900">Your Profile</h1>
+          <h1 className="text-lg font-semibold text-slate-900">Profile & Settings</h1>
         </div>
       </header>
 
-      {/* Profile Form */}
-      <main className="max-w-2xl mx-auto px-4 py-8">
+      <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+        {/* Profile Form */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          {/* Account Info (read-only) */}
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">Account Information</h2>
-            <div className="grid gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1">Username</label>
-                <div className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700">
-                  {userData?.username}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-600 mb-1">Email</label>
-                <div className="px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700">
-                  {userData?.email}
-                </div>
-              </div>
-            </div>
-          </div>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Personal Information</h2>
+          {success && <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">Saved successfully!</div>}
 
-          {/* Editable Profile */}
-          <form onSubmit={handleSubmit}>
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">Personal Information</h2>
-            <p className="text-sm text-slate-600 mb-6">
-              This information helps the AI biographer personalize your interview experience.
-            </p>
-
-            {success && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
-                Profile updated successfully!
-              </div>
-            )}
-
-            <div className="grid gap-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="fullName" className="block text-sm font-medium text-slate-700 mb-2">
-                  Full Name
-                </label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Username</label>
                 <input
-                  id="fullName"
                   type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Enter your full name"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-slate-900"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-lg text-slate-900 ${usernameError ? 'border-red-300' : 'border-slate-200'} focus:ring-2 focus:ring-primary focus:border-transparent`}
                 />
+                {usernameError && <p className="mt-1 text-xs text-red-600">{usernameError}</p>}
               </div>
-
               <div>
-                <label htmlFor="birthDate" className="block text-sm font-medium text-slate-700 mb-2">
-                  Birth Date
-                </label>
-                <input
-                  id="birthDate"
-                  type="date"
-                  value={birthDate}
-                  onChange={(e) => setBirthDate(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-slate-900"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="birthPlace" className="block text-sm font-medium text-slate-700 mb-2">
-                  Birth Place
-                </label>
-                <input
-                  id="birthPlace"
-                  type="text"
-                  value={birthPlace}
-                  onChange={(e) => setBirthPlace(e.target.value)}
-                  placeholder="City, Country"
-                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-slate-900"
-                />
+                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 text-sm">{userData?.email}</div>
               </div>
             </div>
 
-            <div className="mt-6">
-              <button
-                type="submit"
-                disabled={saving}
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {saving ? 'Saving...' : 'Save Changes'}
-              </button>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+              <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your full name" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent" />
             </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Birth Date</label>
+                <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Birth Place</label>
+                <input type="text" value={birthPlace} onChange={(e) => setBirthPlace(e.target.value)} placeholder="City, Country" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Preferred Language</label>
+              <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-900 bg-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                {languages.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+              </select>
+              <p className="mt-1 text-xs text-slate-500">AI will speak in this language</p>
+            </div>
+
+            <button type="submit" disabled={saving} className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-medium rounded-lg transition disabled:opacity-50">
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
           </form>
+        </div>
+
+        {/* API Usage */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">API Usage</h2>
+          {usage ? (
+            <>
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="bg-slate-50 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-primary">{formatCost(usage.totals.totalCost)}</div>
+                  <div className="text-sm text-slate-500">Total Cost</div>
+                </div>
+                <div className="bg-slate-50 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-slate-900">{formatTokens(usage.totals.totalTokens)}</div>
+                  <div className="text-sm text-slate-500">Tokens Used</div>
+                </div>
+                <div className="bg-slate-50 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-slate-900">{usage.totals.requestCount}</div>
+                  <div className="text-sm text-slate-500">API Calls</div>
+                </div>
+              </div>
+
+              {Object.keys(usage.byEndpoint).length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium text-slate-700 mb-2">By Feature</h3>
+                  <div className="space-y-2">
+                    {Object.entries(usage.byEndpoint).map(([endpoint, data]) => (
+                      <div key={endpoint} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg text-sm">
+                        <span className="text-slate-700 capitalize">{endpoint.replace('-', ' ')}</span>
+                        <span className="text-slate-500">{data.requests} calls · {formatCost(data.cost)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="text-slate-500 text-center py-4">No usage data yet</p>
+          )}
         </div>
       </main>
     </div>

@@ -1,7 +1,21 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { extractLifeEvents, type Message } from '@/lib/claude';
+import { extractLifeEvents, type Message, type UsageInfo } from '@/lib/claude';
+
+// Helper to save API usage
+async function saveUsage(userId: string, usage: UsageInfo, endpoint: string) {
+  await prisma.apiUsage.create({
+    data: {
+      userId,
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+      model: usage.model,
+      endpoint,
+      costUsd: usage.costUsd,
+    },
+  });
+}
 
 // POST /api/interview/extract - Extract life events from interview conversation
 export async function POST(request: Request) {
@@ -54,7 +68,10 @@ export async function POST(request: Request) {
     }
 
     // Extract events using Claude
-    const extractedEvents = await extractLifeEvents(messages, userName);
+    const { events: extractedEvents, usage } = await extractLifeEvents(messages, userName);
+
+    // Save usage
+    await saveUsage(session.user.id, usage, 'extract');
 
     // Save extracted events to database
     const savedEvents = [];

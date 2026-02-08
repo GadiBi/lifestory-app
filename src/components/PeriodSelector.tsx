@@ -22,7 +22,7 @@ export default function PeriodSelector({
 }: PeriodSelectorProps) {
   return (
     <div className="flex items-center gap-2">
-      <label htmlFor="period" className="text-xs sm:text-sm font-medium text-slate-600 whitespace-nowrap">
+      <label htmlFor="period" className="text-xs sm:text-sm font-medium text-text-secondary whitespace-nowrap">
         <span className="hidden sm:inline">Life Period:</span>
         <span className="sm:hidden">Period:</span>
       </label>
@@ -31,7 +31,7 @@ export default function PeriodSelector({
         value={currentPeriod}
         onChange={(e) => onPeriodChange(e.target.value)}
         disabled={disabled}
-        className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:opacity-50 disabled:cursor-not-allowed bg-white text-slate-900 max-w-[150px] sm:max-w-none"
+        className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm border border-warm-mauve/20 rounded-xl focus:ring-2 focus:ring-soft-purple focus:border-transparent outline-none disabled:opacity-50 disabled:cursor-not-allowed bg-warm-cream text-text-primary max-w-[150px] sm:max-w-none"
       >
         {LIFE_PERIODS.map((period) => (
           <option key={period.id} value={period.id}>

@@ -1,10 +1,13 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
+  
 }
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -17,7 +20,6 @@ model User {
   profile    Profile?
   lifeEvents LifeEvent[]
   interviews Interview[]
-  apiUsage   ApiUsage[]
 }
 
 model Profile {
@@ -27,7 +29,6 @@ model Profile {
   fullName  String?
   birthDate DateTime?
   birthPlace String?
-  language  String?   @default("en")
   updatedAt DateTime  @updatedAt
 }
 
@@ -38,9 +39,9 @@ model LifeEvent {
   title       String
   description String
   date        DateTime?
-  period      String?
-  category    String?
-  emotions    String?
+  period      String?   // e.g., "childhood", "college years"
+  category    String?   // e.g., "family", "career", "milestone"
+  emotions    String?   // Associated feelings
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -52,23 +53,11 @@ model Interview {
   id              String   @id @default(cuid())
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  currentPeriod   String
-  conversationLog String
-  status          String   @default("active")
+  currentPeriod   String   // Where in life timeline we are
+  conversationLog String   // JSON string for conversation history
+  status          String   @default("active") // active, paused, completed
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   extractedEvents LifeEvent[]
-}
-
-model ApiUsage {
-  id           String   @id @default(cuid())
-  userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  inputTokens  Int
-  outputTokens Int
-  model        String
-  endpoint     String   // 'chat', 'extract', 'life-script', 'opening'
-  costUsd      Float
-  createdAt    DateTime @default(now())
 }

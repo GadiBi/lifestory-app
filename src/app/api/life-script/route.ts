@@ -7,6 +7,21 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+// Claude Sonnet pricing (per 1M tokens)
+const PRICING = {
+  'claude-sonnet-4-20250514': {
+    input: 3.00,
+    output: 15.00,
+  },
+};
+
+function calculateCost(model: string, inputTokens: number, outputTokens: number): number {
+  const pricing = PRICING[model as keyof typeof PRICING] || PRICING['claude-sonnet-4-20250514'];
+  const inputCost = (inputTokens / 1_000_000) * pricing.input;
+  const outputCost = (outputTokens / 1_000_000) * pricing.output;
+  return inputCost + outputCost;
+}
+
 const LIFE_PERIODS_ORDER = [
   'early_childhood',
   'childhood',
@@ -106,8 +121,9 @@ Writing Guidelines:
 
 Style: ${style === 'poetic' ? 'Use lyrical, evocative language with metaphors and imagery' : style === 'journalistic' ? 'Use clear, factual prose with a documentary feel' : 'Use warm, engaging narrative prose suitable for a memoir'}`;
 
+    const model = 'claude-sonnet-4-20250514';
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model,
       max_tokens: 4096,
       system: systemPrompt,
       messages: [
@@ -126,6 +142,22 @@ Create a cohesive, beautifully written biography that brings these moments to li
 
     const lifeScript =
       response.content[0].type === 'text' ? response.content[0].text : '';
+
+    // Save usage
+    const inputTokens = response.usage.input_tokens;
+    const outputTokens = response.usage.output_tokens;
+    const costUsd = calculateCost(model, inputTokens, outputTokens);
+
+    await prisma.apiUsage.create({
+      data: {
+        userId: session.user.id,
+        inputTokens,
+        outputTokens,
+        model,
+        endpoint: 'life-script',
+        costUsd,
+      },
+    });
 
     return NextResponse.json({
       lifeScript,
