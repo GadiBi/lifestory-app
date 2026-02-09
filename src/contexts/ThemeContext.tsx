@@ -97,11 +97,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('lifestory-theme');
   }
 
-  // Don't render until mounted to prevent hydration mismatch
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
   return (
     <ThemeContext.Provider value={{ theme, setTheme, colors: THEME_COLORS, fonts: FONT_FAMILIES, resetTheme }}>
       {children}
