@@ -20,9 +20,9 @@ interface Metadata {
 }
 
 const STYLES = [
-  { id: 'narrative', label: 'Narrative', desc: 'Warm, engaging memoir style' },
-  { id: 'poetic', label: 'Poetic', desc: 'Lyrical with metaphors' },
-  { id: 'journalistic', label: 'Journalistic', desc: 'Clear, factual style' },
+  { id: 'narrative', label: 'Narrative', desc: 'Warm, engaging memoir style', icon: '📖' },
+  { id: 'poetic', label: 'Poetic', desc: 'Lyrical with metaphors', icon: '🌸' },
+  { id: 'journalistic', label: 'Journalistic', desc: 'Clear, factual style', icon: '📰' },
 ];
 
 export default function LifeScriptPage() {
@@ -77,34 +77,206 @@ export default function LifeScriptPage() {
   function downloadPDF() {
     if (!lifeScript || !metadata) return;
 
-    // Create printable HTML
     const printContent = `
       <!DOCTYPE html>
       <html>
       <head>
         <title>${metadata.userName}'s Life Story</title>
         <style>
-          body { font-family: Georgia, serif; max-width: 700px; margin: 40px auto; padding: 20px; line-height: 1.8; color: #333; }
-          h1 { text-align: center; font-size: 28px; margin-bottom: 10px; }
-          .meta { text-align: center; color: #666; font-size: 14px; margin-bottom: 40px; border-bottom: 1px solid #ddd; padding-bottom: 20px; }
-          h2 { font-size: 20px; margin-top: 30px; color: #444; }
-          p { margin-bottom: 16px; text-align: justify; }
-          .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #999; }
+          @page {
+            size: A4;
+            margin: 2.5cm 2cm;
+          }
+
+          * {
+            box-sizing: border-box;
+          }
+
+          body {
+            font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            line-height: 1.9;
+            color: #2d3748;
+            font-size: 12pt;
+            background: #fff;
+          }
+
+          /* Title Page */
+          .title-page {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            page-break-after: always;
+            padding: 2cm;
+          }
+
+          .title-page h1 {
+            font-size: 32pt;
+            font-weight: normal;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 0.5cm;
+            color: #1a202c;
+          }
+
+          .title-page .subtitle {
+            font-size: 16pt;
+            font-style: italic;
+            color: #718096;
+            margin-bottom: 2cm;
+          }
+
+          .title-page .author {
+            font-size: 18pt;
+            color: #4a5568;
+            margin-bottom: 0.5cm;
+          }
+
+          .title-page .ornament {
+            font-size: 24pt;
+            color: #cbd5e0;
+            margin: 1cm 0;
+          }
+
+          .title-page .meta {
+            font-size: 10pt;
+            color: #a0aec0;
+            position: absolute;
+            bottom: 3cm;
+          }
+
+          /* Content */
+          .content {
+            padding: 0;
+          }
+
+          /* Chapter Headers */
+          h1 {
+            font-size: 24pt;
+            font-weight: normal;
+            text-align: center;
+            margin: 2cm 0 1cm;
+            color: #1a202c;
+            page-break-before: always;
+            letter-spacing: 1px;
+          }
+
+          h1:first-of-type {
+            page-break-before: auto;
+          }
+
+          h1::before {
+            content: '❧';
+            display: block;
+            font-size: 18pt;
+            color: #cbd5e0;
+            margin-bottom: 0.5cm;
+          }
+
+          h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            font-style: italic;
+            color: #4a5568;
+            margin: 1.5cm 0 0.5cm;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.3cm;
+          }
+
+          /* Paragraphs */
+          p {
+            margin: 0 0 0.5cm;
+            text-align: justify;
+            text-indent: 1cm;
+            hyphens: auto;
+          }
+
+          p:first-of-type {
+            text-indent: 0;
+          }
+
+          p:first-of-type::first-letter {
+            font-size: 3em;
+            float: left;
+            line-height: 0.8;
+            padding-right: 0.1em;
+            color: #4a5568;
+            font-weight: bold;
+          }
+
+          /* Quotes */
+          blockquote {
+            margin: 1cm 1.5cm;
+            padding: 0.5cm 1cm;
+            border-left: 3px solid #cbd5e0;
+            font-style: italic;
+            color: #4a5568;
+          }
+
+          /* Footer */
+          .footer {
+            margin-top: 3cm;
+            padding-top: 1cm;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 10pt;
+            color: #a0aec0;
+          }
+
+          .footer .ornament {
+            font-size: 14pt;
+            color: #cbd5e0;
+            margin-bottom: 0.5cm;
+          }
+
+          /* Print optimizations */
+          @media print {
+            body {
+              print-color-adjust: exact;
+              -webkit-print-color-adjust: exact;
+            }
+            .title-page {
+              height: auto;
+              min-height: 100vh;
+            }
+          }
         </style>
       </head>
       <body>
-        <h1>The Life Story of ${metadata.userName}</h1>
-        <div class="meta">
-          Generated on ${new Date(metadata.generatedAt).toLocaleDateString()}<br/>
-          Based on ${metadata.totalEvents} documented life events
+        <!-- Title Page -->
+        <div class="title-page">
+          <div class="ornament">☙ ❧</div>
+          <h1 style="page-break-before: auto; margin-top: 0;">${metadata.userName}</h1>
+          <div class="subtitle">A Life Story</div>
+          <div class="ornament">◆</div>
+          <div class="meta">
+            Based on ${metadata.totalEvents} documented memories<br/>
+            Generated on ${new Date(metadata.generatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </div>
         </div>
-        ${lifeScript.split('\n').map(p => {
-          if (p.startsWith('# ')) return `<h1>${p.replace('# ', '')}</h1>`;
-          if (p.startsWith('## ')) return `<h2>${p.replace('## ', '')}</h2>`;
-          if (p.trim()) return `<p>${p}</p>`;
-          return '';
-        }).join('')}
-        <div class="footer">Generated by LifeStory</div>
+
+        <!-- Content -->
+        <div class="content">
+          ${lifeScript.split('\n').map(p => {
+            if (p.startsWith('# ')) return `<h1>${p.replace('# ', '')}</h1>`;
+            if (p.startsWith('## ')) return `<h2>${p.replace('## ', '')}</h2>`;
+            if (p.startsWith('> ')) return `<blockquote>${p.replace('> ', '')}</blockquote>`;
+            if (p.trim()) return `<p>${p}</p>`;
+            return '';
+          }).join('')}
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+          <div class="ornament">❦</div>
+          <p>This story was lovingly preserved with LifeStory</p>
+          <p>Every life has a story worth telling</p>
+        </div>
       </body>
       </html>
     `;
@@ -114,14 +286,38 @@ export default function LifeScriptPage() {
       printWindow.document.write(printContent);
       printWindow.document.close();
       printWindow.onload = () => {
-        printWindow.print();
+        setTimeout(() => printWindow.print(), 500);
       };
     }
   }
 
   function downloadText() {
     if (!lifeScript || !metadata) return;
-    const content = `THE LIFE STORY OF ${metadata.userName.toUpperCase()}\n\nGenerated: ${new Date(metadata.generatedAt).toLocaleDateString()}\nBased on ${metadata.totalEvents} life events\n\n${'='.repeat(50)}\n\n${lifeScript}\n\n${'='.repeat(50)}\nGenerated by LifeStory`;
+
+    const divider = '═'.repeat(60);
+    const content = `
+${divider}
+
+                    THE LIFE STORY OF
+                  ${metadata.userName.toUpperCase()}
+
+${divider}
+
+Generated: ${new Date(metadata.generatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+Based on ${metadata.totalEvents} life events
+Style: ${metadata.style}
+
+${divider}
+
+${lifeScript}
+
+${divider}
+
+This story was preserved with LifeStory
+Every life has a story worth telling
+
+${divider}
+`;
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -140,132 +336,232 @@ export default function LifeScriptPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-slate-600">Loading...</div>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="flex items-center gap-3 text-slate-500">
+          <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          Loading...
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+    <div className="min-h-screen bg-white">
+      <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg">
+            <Link href="/dashboard" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </Link>
-            <h1 className="text-lg font-semibold text-slate-900">Life Script</h1>
+            <div>
+              <h1 className="text-xl font-semibold text-slate-900">Life Script</h1>
+              <p className="text-sm text-slate-500">Your written biography</p>
+            </div>
           </div>
           {lifeScript && (
             <div className="flex gap-2">
-              <button onClick={copyToClipboard} className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600">
-                Copy
+              <button onClick={copyToClipboard} className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition" title="Copy">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                </svg>
               </button>
-              <button onClick={downloadText} className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600">
-                TXT
+              <button onClick={downloadText} className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition" title="Download TXT">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
               </button>
-              <button onClick={downloadPDF} className="px-3 py-1.5 text-sm bg-primary text-white rounded-lg hover:bg-primary-dark">
-                PDF
+              <button onClick={downloadPDF} className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary-dark transition font-medium">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span className="hidden sm:inline">Download PDF</span>
               </button>
             </div>
           )}
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {!lifeScript ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-8">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-slate-900 mb-2">Generate Your Life Script</h2>
-              <p className="text-slate-500">Transform your memories into a written biography</p>
+              <p className="text-slate-500">Transform your memories into a beautifully written biography</p>
             </div>
 
             {stats && (
-              <div className="bg-slate-50 rounded-lg p-4 mb-6 flex items-center justify-between">
-                <div>
-                  <span className="text-2xl font-bold text-slate-900">{stats.totalEvents}</span>
-                  <span className="text-slate-500 ml-2">life events</span>
+              <div className="bg-slate-50 rounded-xl p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center border border-slate-200">
+                    <span className="text-2xl font-bold text-primary">{stats.totalEvents}</span>
+                  </div>
+                  <div>
+                    <div className="font-medium text-slate-900">Life Events</div>
+                    <div className="text-sm text-slate-500">Ready to become your story</div>
+                  </div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${stats.canGenerate ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                  {stats.canGenerate ? 'Ready to generate' : 'Need 3+ events'}
+                <span className={`px-4 py-2 rounded-full text-sm font-medium ${stats.canGenerate ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                  {stats.canGenerate ? '✓ Ready to generate' : 'Need 3+ events'}
                 </span>
               </div>
             )}
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 mb-3">Writing Style</label>
-              <div className="grid gap-2">
+              <label className="block text-sm font-medium text-slate-700 mb-3">Choose Your Writing Style</label>
+              <div className="grid gap-3">
                 {STYLES.map(s => (
-                  <label key={s.id} className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition ${selectedStyle === s.id ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-slate-300'}`}>
-                    <input type="radio" name="style" value={s.id} checked={selectedStyle === s.id} onChange={e => setSelectedStyle(e.target.value)} className="text-primary" />
-                    <div>
+                  <button
+                    key={s.id}
+                    onClick={() => setSelectedStyle(s.id)}
+                    className={`flex items-center gap-4 p-4 rounded-xl border text-left transition ${
+                      selectedStyle === s.id
+                        ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <span className="text-2xl">{s.icon}</span>
+                    <div className="flex-1">
                       <div className="font-medium text-slate-900">{s.label}</div>
                       <div className="text-sm text-slate-500">{s.desc}</div>
                     </div>
-                  </label>
+                    {selectedStyle === s.id && (
+                      <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </button>
                 ))}
               </div>
             </div>
 
-            {error && <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-center gap-3">
+                <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                {error}
+              </div>
+            )}
 
             <button
               onClick={generateLifeScript}
               disabled={generating || !stats?.canGenerate}
-              className="w-full py-3 bg-primary hover:bg-primary-dark text-white font-medium rounded-lg transition disabled:opacity-50"
+              className="w-full py-4 bg-primary hover:bg-primary-dark text-white font-medium rounded-xl transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {generating ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Writing your story...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
-                  Generating...
-                </span>
-              ) : 'Generate Life Script'}
+                  Generate Life Script
+                </>
+              )}
             </button>
 
             {!stats?.canGenerate && (
               <p className="text-center text-sm text-slate-500 mt-4">
-                <Link href="/interview" className="text-primary hover:underline">Start a conversation</Link> to add more events
+                <Link href="/interview" className="text-primary hover:underline">Start a conversation</Link> to add more memories to your story
               </p>
             )}
           </div>
         ) : (
           <div>
             {metadata && (
-              <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
-                <div className="flex flex-wrap gap-4 text-sm text-primary">
-                  <span><strong>Author:</strong> {metadata.userName}</span>
-                  <span><strong>Events:</strong> {metadata.totalEvents}</span>
-                  <span><strong>Style:</strong> {metadata.style}</span>
-                  <span><strong>Generated:</strong> {new Date(metadata.generatedAt).toLocaleDateString()}</span>
+              <div className="bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-xl p-4 sm:p-5 mb-6">
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+                  <span className="flex items-center gap-2 text-primary">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    {metadata.userName}
+                  </span>
+                  <span className="flex items-center gap-2 text-primary">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    {metadata.totalEvents} events
+                  </span>
+                  <span className="flex items-center gap-2 text-primary">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                    {STYLES.find(s => s.id === metadata.style)?.label || metadata.style}
+                  </span>
+                  <span className="flex items-center gap-2 text-primary">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    {new Date(metadata.generatedAt).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             )}
 
-            <div className="bg-white rounded-xl border border-slate-200 p-8">
-              <div className="prose prose-slate max-w-none">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-sm">
+              <article className="prose prose-slate prose-lg max-w-none">
                 {lifeScript.split('\n').map((p, i) => {
-                  if (p.startsWith('# ')) return <h1 key={i} className="text-2xl font-bold text-slate-900 mt-6 mb-4 first:mt-0">{p.replace('# ', '')}</h1>;
-                  if (p.startsWith('## ')) return <h2 key={i} className="text-xl font-semibold text-slate-800 mt-5 mb-3">{p.replace('## ', '')}</h2>;
+                  if (p.startsWith('# ')) {
+                    return (
+                      <h1 key={i} className="text-3xl font-bold text-slate-900 mt-12 mb-6 first:mt-0 text-center border-b border-slate-200 pb-4">
+                        {p.replace('# ', '')}
+                      </h1>
+                    );
+                  }
+                  if (p.startsWith('## ')) {
+                    return (
+                      <h2 key={i} className="text-xl font-semibold text-slate-800 mt-8 mb-4 italic">
+                        {p.replace('## ', '')}
+                      </h2>
+                    );
+                  }
+                  if (p.startsWith('> ')) {
+                    return (
+                      <blockquote key={i} className="border-l-4 border-primary/30 pl-4 italic text-slate-600 my-6">
+                        {p.replace('> ', '')}
+                      </blockquote>
+                    );
+                  }
                   if (p.trim() === '') return <br key={i} />;
-                  return <p key={i} className="text-slate-600 leading-relaxed mb-4">{p}</p>;
+                  return (
+                    <p key={i} className="text-slate-700 leading-relaxed mb-4 text-justify">
+                      {p}
+                    </p>
+                  );
                 })}
-              </div>
+              </article>
             </div>
 
-            <div className="text-center mt-6">
-              <button onClick={() => { setLifeScript(null); setMetadata(null); }} className="text-primary hover:underline text-sm">
-                Generate a new version
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+              <button
+                onClick={() => { setLifeScript(null); setMetadata(null); }}
+                className="flex items-center gap-2 px-6 py-3 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Generate New Version
               </button>
+              <Link
+                href="/share"
+                className="flex items-center gap-2 px-6 py-3 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl transition"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                Share Your Story
+              </Link>
             </div>
           </div>
         )}

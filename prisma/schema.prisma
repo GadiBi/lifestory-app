@@ -3,20 +3,23 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id           String      @id @default(cuid())
-  username     String      @unique
-  email        String      @unique
+  id           String        @id @default(cuid())
+  username     String        @unique
+  email        String        @unique
   passwordHash String
-  createdAt    DateTime    @default(now())
+  createdAt    DateTime      @default(now())
   apiUsage     ApiUsage[]
   interviews   Interview[]
   lifeEvents   LifeEvent[]
   profile      Profile?
+  media        Media[]
+  sharedStories SharedStory[]
 }
 
 model Profile {
@@ -44,6 +47,7 @@ model LifeEvent {
   interviewId String?
   interview   Interview? @relation(fields: [interviewId], references: [id])
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  media       Media[]
 }
 
 model Interview {
@@ -68,4 +72,47 @@ model ApiUsage {
   costUsd      Float
   createdAt    DateTime @default(now())
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Media {
+  id          String     @id @default(cuid())
+  userId      String
+  url         String
+  publicId    String     @unique
+  type        String     @default("image")
+  title       String?
+  description String?
+  width       Int?
+  height      Int?
+  size        Int?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lifeEventId String?
+  lifeEvent   LifeEvent? @relation(fields: [lifeEventId], references: [id], onDelete: SetNull)
+}
+
+model SharedStory {
+  id           String    @id @default(cuid())
+  userId       String
+  shareCode    String    @unique
+  title        String?
+  isPublic     Boolean   @default(false)
+  password     String?
+  expiresAt    DateTime?
+  viewCount    Int       @default(0)
+  lastViewedAt DateTime?
+  content      String?   @db.Text
+  periodsIncluded String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

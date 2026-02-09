@@ -25,6 +25,17 @@ export async function GET(request: Request) {
         { date: 'asc' },
         { createdAt: 'asc' },
       ],
+      include: {
+        media: {
+          select: {
+            id: true,
+            url: true,
+            title: true,
+            width: true,
+            height: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json({ events });
