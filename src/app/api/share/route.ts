@@ -68,7 +68,7 @@ export async function POST(request: Request) {
 
     // Build shareable content
     const content = JSON.stringify({
-      userName: profile?.fullName || session.user.username,
+      userName: profile?.fullName || session.user.name,
       events: events.map(e => ({
         title: e.title,
         description: e.description,
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       data: {
         userId: session.user.id,
         shareCode,
-        title: title || `${profile?.fullName || session.user.username}'s Life Story`,
+        title: title || `${profile?.fullName || session.user.name}'s Life Story`,
         isPublic: isPublic || false,
         password: password || null,
         expiresAt,
