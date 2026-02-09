@@ -8,6 +8,7 @@ import Link from 'next/link';
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  audioUrl?: string;
 }
 
 interface Interview {
@@ -57,6 +58,15 @@ export default function InterviewPage() {
   const [speechSupported, setSpeechSupported] = useState(true);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+
+  // Audio recording state
+  const [isRecordingAudio, setIsRecordingAudio] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const languages = [
     { code: '', label: 'Auto' },
@@ -291,6 +301,125 @@ export default function InterviewPage() {
     }
   }
 
+  // Audio recording functions
+  async function startAudioRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        setAudioBlob(blob);
+        setAudioUrl(URL.createObjectURL(blob));
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setIsRecordingAudio(true);
+      setRecordingDuration(0);
+
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingDuration(d => d + 1);
+      }, 1000);
+    } catch {
+      setSpeechError('Microphone access denied.');
+    }
+  }
+
+  function stopAudioRecording() {
+    if (mediaRecorderRef.current && isRecordingAudio) {
+      mediaRecorderRef.current.stop();
+      setIsRecordingAudio(false);
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current);
+      }
+    }
+  }
+
+  function cancelAudioRecording() {
+    if (mediaRecorderRef.current && isRecordingAudio) {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecordingAudio(false);
+    setAudioBlob(null);
+    setAudioUrl(null);
+    setRecordingDuration(0);
+    if (recordingTimerRef.current) {
+      clearInterval(recordingTimerRef.current);
+    }
+  }
+
+  async function sendAudioMessage() {
+    if (!audioBlob || !interview) return;
+
+    setLoading(true);
+    setSaveStatus('saving');
+
+    try {
+      // Upload audio to server
+      const formData = new FormData();
+      formData.append('file', audioBlob, 'voice-memo.webm');
+      formData.append('title', 'Voice Memo');
+
+      const uploadRes = await fetch('/api/media', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadRes.ok) throw new Error('Upload failed');
+      const { media } = await uploadRes.json();
+
+      // Add audio message to UI
+      const userMessage: Message = {
+        role: 'user',
+        content: '🎤 Voice memo',
+        audioUrl: media.url,
+      };
+      setMessages(prev => [...prev, userMessage]);
+
+      // Clear audio state
+      setAudioBlob(null);
+      setAudioUrl(null);
+      setRecordingDuration(0);
+
+      // Send to Claude with transcription note
+      const res = await fetch('/api/interview/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          interviewId: interview.id,
+          message: '[User sent a voice memo - please acknowledge and continue the conversation naturally]',
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to send');
+      const data = await res.json();
+
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2000);
+    } catch (error) {
+      console.error('Send audio error:', error);
+      setSpeechError('Failed to send voice memo.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function formatDuration(seconds: number) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
   async function handlePeriodChange(newPeriod: string) {
     if (!interview) return;
     try {
@@ -488,6 +617,9 @@ export default function InterviewPage() {
                       : 'text-slate-700'
                   }`}>
                     <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                    {msg.audioUrl && (
+                      <audio src={msg.audioUrl} controls className="mt-2 w-full h-10" />
+                    )}
                   </div>
                 </div>
               </div>
@@ -538,6 +670,50 @@ export default function InterviewPage() {
               <span className="text-sm text-red-600">Listening...</span>
             </div>
           )}
+          {isRecordingAudio && (
+            <div className="mb-3 flex items-center justify-center gap-3 py-2 px-4 bg-red-50 rounded-lg">
+              <div className="relative">
+                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+              </div>
+              <span className="text-sm font-medium text-red-600">Recording {formatDuration(recordingDuration)}</span>
+              <button
+                type="button"
+                onClick={stopAudioRecording}
+                className="px-3 py-1 bg-red-500 text-white text-xs rounded-full hover:bg-red-600 transition"
+              >
+                Stop
+              </button>
+              <button
+                type="button"
+                onClick={cancelAudioRecording}
+                className="px-3 py-1 bg-slate-200 text-slate-600 text-xs rounded-full hover:bg-slate-300 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+          {audioUrl && !isRecordingAudio && (
+            <div className="mb-3 flex items-center gap-3 py-2 px-4 bg-slate-50 rounded-lg">
+              <audio src={audioUrl} controls className="h-10 flex-1" />
+              <button
+                type="button"
+                onClick={sendAudioMessage}
+                disabled={loading}
+                className="px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition disabled:opacity-50"
+              >
+                Send
+              </button>
+              <button
+                type="button"
+                onClick={cancelAudioRecording}
+                className="p-2 text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
           {saveStatus !== 'idle' && (
             <div className="mb-2 flex items-center justify-center gap-2 text-xs text-slate-400">
               {saveStatus === 'saving' ? (
@@ -580,13 +756,14 @@ export default function InterviewPage() {
             </div>
 
             <div className="flex items-center gap-1">
-              {/* Voice button */}
+              {/* Voice-to-text button */}
               <button
                 type="button"
                 onClick={toggleListening}
-                disabled={!speechSupported}
+                disabled={!speechSupported || isRecordingAudio}
+                title="Voice to text"
                 className={`p-3 rounded-xl transition ${
-                  !speechSupported
+                  !speechSupported || isRecordingAudio
                     ? 'text-slate-200 cursor-not-allowed'
                     : isListening
                       ? 'bg-red-500 text-white'
@@ -595,6 +772,30 @@ export default function InterviewPage() {
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+              </button>
+
+              {/* Audio recording button */}
+              <button
+                type="button"
+                onClick={isRecordingAudio ? stopAudioRecording : startAudioRecording}
+                disabled={isListening}
+                title="Record voice memo"
+                className={`p-3 rounded-xl transition ${
+                  isListening
+                    ? 'text-slate-200 cursor-not-allowed'
+                    : isRecordingAudio
+                      ? 'bg-red-500 text-white animate-pulse'
+                      : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <svg className="w-5 h-5" fill={isRecordingAudio ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" strokeWidth={2} />
+                  {isRecordingAudio ? (
+                    <rect x="9" y="9" width="6" height="6" rx="1" />
+                  ) : (
+                    <circle cx="12" cy="12" r="4" fill="currentColor" />
+                  )}
                 </svg>
               </button>
 
