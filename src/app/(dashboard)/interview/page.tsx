@@ -392,7 +392,7 @@ export default function InterviewPage() {
               </svg>
             </Link>
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-medium text-slate-800">LifeStory</h1>
+              <Link href="/dashboard" className="text-base font-medium text-slate-800 hover:text-primary transition">LifeStory</Link>
               <span className="text-slate-300">|</span>
               <select
                 value={interview?.currentPeriod || 'early_childhood'}
