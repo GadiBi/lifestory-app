@@ -4,6 +4,9 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
+    // Test database connection first
+    await prisma.$connect();
+
     const { username, email, password } = await request.json();
 
     // Validate input
