@@ -106,8 +106,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
 export function useTheme() {
   const context = useContext(ThemeContext);
+  // Return defaults during prerender when context isn't available
   if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    return {
+      theme: DEFAULT_THEME,
+      setTheme: () => {},
+      colors: THEME_COLORS,
+      fonts: FONT_FAMILIES,
+      resetTheme: () => {},
+    };
   }
   return context;
 }
