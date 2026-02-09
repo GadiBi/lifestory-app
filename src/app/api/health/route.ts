@@ -7,10 +7,13 @@ export async function GET() {
     databaseUrl: false,
     authSecret: false,
     error: null as string | null,
+    dbUrlPreview: '',
   };
 
-  // Check if DATABASE_URL exists
-  checks.databaseUrl = !!process.env.DATABASE_URL;
+  // Check if DATABASE_URL exists and show preview (hide password)
+  const dbUrl = process.env.DATABASE_URL || '';
+  checks.databaseUrl = !!dbUrl;
+  checks.dbUrlPreview = dbUrl.replace(/:[^:@]+@/, ':***@').substring(0, 80);
 
   // Check if AUTH_SECRET exists
   checks.authSecret = !!process.env.AUTH_SECRET;
@@ -29,10 +32,5 @@ export async function GET() {
   return NextResponse.json({
     status: allGood ? 'healthy' : 'unhealthy',
     checks,
-    env: {
-      hasDbUrl: checks.databaseUrl,
-      hasAuthSecret: checks.authSecret,
-      nodeEnv: process.env.NODE_ENV,
-    }
   }, { status: allGood ? 200 : 500 });
 }
