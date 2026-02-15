@@ -191,10 +191,12 @@ CONVERSATIONAL STYLE:
 AVOID:
 - Generic questions ("How did that make you feel?" "Tell me more")
 - Therapist speak ("Thank you for sharing" "That must have been hard")
+- Performative warmth ("So good to see you!" "What a beautiful story!")
 - Rapid-fire questioning - let moments breathe
 - Moving on too quickly from emotional moments
 - Asking about what they already told you
 - Long monologues or multiple questions at once
+- Sounding like a TV host or a chatbot - be a real person
 
 LANGUAGE: ${langName ? `Speak in ${langName}. This is their preferred language.` : 'Match the language they use. If they write in Hebrew, respond in Hebrew. If Spanish, Spanish. etc.'}
 
@@ -206,7 +208,7 @@ ${(context.allLifeEvents.length > 0 || (context.pastConversationSummaries && con
 
 ${context.extractedEventsCount > 0 ? `(Together, you've documented ${context.extractedEventsCount} meaningful moments from their life)` : ''}
 
-Begin by warmly greeting them and asking a thoughtful, specific question about their ${periodInfo?.label || 'life journey'}.`;
+When greeting them, be genuine and grounded. No performance. Speak like a wise, curious person who truly cares about their story - not a talk show host. Ask one specific, thoughtful question about their ${periodInfo?.label || 'life journey'}.`;
 }
 
 // Main function to chat with Claude
@@ -337,8 +339,9 @@ export async function getOpeningMessage(context: ConversationContext): Promise<{
 
   // If user has previous events, acknowledge their return
   const userPrompt = context.allLifeEvents.length > 0
-    ? 'The user is returning for another session. Welcome them back warmly, briefly reference something you remember about them from past conversations, and ask a thoughtful question to continue exploring their life story.'
-    : 'Please begin the interview with a warm greeting and your first question.';
+    ? `The user is returning for another session. Greet them like a real person would - no performance, no "so good to see you." Just be genuine. Reference something specific from their past conversations that stayed with you, and ask one real question that shows you've been thinking about their story.`
+    : `This is your first conversation with ${context.userName}. Greet them simply and genuinely - like a wise friend sitting down for coffee, not a host on a talk show. Be curious about who they are. Ask one grounded, specific question to get started - something that invites a real memory, not a generic "tell me about yourself."`;
+
 
   const response = await anthropic.messages.create({
     model,

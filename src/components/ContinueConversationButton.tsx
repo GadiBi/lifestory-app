@@ -36,13 +36,13 @@ export default function ContinueConversationButton() {
 
   if (isDisabled) {
     return (
-      <div className="block w-full bg-slate-100 border border-slate-200 rounded-xl p-4 sm:p-6 cursor-not-allowed opacity-60">
+      <div className="block w-full bg-slate-100 border border-slate-200 rounded-2xl p-5 cursor-not-allowed opacity-60">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-200 rounded-xl flex items-center justify-center text-slate-400">
+          <div className="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center text-slate-400">
             <ChatIcon />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg sm:text-xl font-semibold text-slate-500 mb-1">Continue Conversation</h3>
+            <h3 className="text-lg font-semibold text-slate-500">Continue Conversation</h3>
             <p className="text-slate-400 text-sm">No previous conversations yet</p>
           </div>
         </div>
@@ -53,23 +53,23 @@ export default function ContinueConversationButton() {
   return (
     <Link
       href={href}
-      className="block w-full bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl p-4 sm:p-6 transition group"
+      className="block w-full bg-primary hover:bg-primary-dark text-white rounded-2xl p-5 transition group"
     >
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-primary/20 rounded-xl flex items-center justify-center text-primary">
+        <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
           <ChatIcon />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-1">Continue Conversation</h3>
+          <h3 className="text-lg font-semibold">Continue Conversation</h3>
           {lastActive ? (
-            <p className="text-slate-600 text-sm truncate">{lastActive.preview || 'Resume your last conversation'}</p>
+            <p className="text-white/70 text-sm truncate">{lastActive.preview || 'Resume your last conversation'}</p>
           ) : loading ? (
-            <p className="text-slate-400 text-sm">Loading...</p>
+            <p className="text-white/50 text-sm">Loading...</p>
           ) : (
-            <p className="text-slate-600 text-sm">Resume your last conversation</p>
+            <p className="text-white/70 text-sm">Resume your last conversation</p>
           )}
         </div>
-        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-primary/60 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5 text-white/50 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </div>

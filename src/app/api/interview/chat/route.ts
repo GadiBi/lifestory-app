@@ -39,17 +39,73 @@ export async function GET() {
       },
     });
 
-    // Add message count and preview to each interview
+    // Add message count and topic-based preview to each interview
     const interviewsWithPreview = interviews.map(interview => {
       let messageCount = 0;
       let preview = '';
       try {
-        const messages = JSON.parse(interview.conversationLog || '[]');
+        const messages = JSON.parse(interview.conversationLog || '[]') as { role: string; content: string }[];
         messageCount = messages.length;
-        // Get first user message as preview
-        const firstUserMsg = messages.find((m: { role: string }) => m.role === 'user');
-        if (firstUserMsg) {
-          preview = firstUserMsg.content.substring(0, 50) + (firstUserMsg.content.length > 50 ? '...' : '');
+
+        // Generate a meaningful conversation name from user messages
+        const userMessages = messages
+          .filter((m) => m.role === 'user')
+          .map((m) => m.content)
+          .slice(0, 5); // Look at first 5 user messages
+
+        if (userMessages.length > 0) {
+          // Combine user messages and extract key topics
+          const combined = userMessages.join(' ').toLowerCase();
+
+          // Try to find proper nouns, places, people names from original text
+          const originalCombined = userMessages.join(' ');
+          const properNouns = originalCombined.match(/\b[A-Z][a-z]{2,}\b/g) || [];
+          const uniqueProperNouns = [...new Set(properNouns)].filter(
+            n => !['The', 'And', 'But', 'For', 'Not', 'You', 'She', 'His', 'Her', 'Was', 'Are', 'They', 'This', 'That', 'Would', 'Could', 'Should', 'Have', 'Been', 'When', 'What', 'How', 'Who', 'Why', 'Where'].includes(n)
+          );
+
+          // Topic keywords to look for
+          const topicPatterns: [RegExp, string][] = [
+            [/\b(mom|mother|mama|ima)\b/i, 'Mom'],
+            [/\b(dad|father|papa|abba|aba)\b/i, 'Dad'],
+            [/\b(grandm|grandmother|grandpa|grandfather|savta|saba)\b/i, 'Grandparents'],
+            [/\b(brother|sister|sibling)\b/i, 'Siblings'],
+            [/\b(school|teacher|class|university|college)\b/i, 'School days'],
+            [/\b(childhood|growing up|kid|young)\b/i, 'Childhood'],
+            [/\b(wedding|marriage|married|wife|husband)\b/i, 'Marriage'],
+            [/\b(army|military|service|soldier)\b/i, 'Military service'],
+            [/\b(immigrat|moved to|came to|left.*country)\b/i, 'Immigration'],
+            [/\b(cook|food|recipe|kitchen|meal)\b/i, 'Food & cooking'],
+            [/\b(work|job|career|office|business)\b/i, 'Career'],
+            [/\b(travel|trip|visit|vacation)\b/i, 'Travel'],
+            [/\b(war|conflict|survived)\b/i, 'Wartime'],
+            [/\b(music|song|sing|play|instrument)\b/i, 'Music'],
+            [/\b(sport|game|team|play)\b/i, 'Sports'],
+            [/\b(friend|friendship|best friend)\b/i, 'Friendships'],
+            [/\b(home|house|apartment|neighborhood|street)\b/i, 'Home'],
+            [/\b(birth|born|baby|pregnan)\b/i, 'Family beginnings'],
+          ];
+
+          const matchedTopics: string[] = [];
+          for (const [pattern, label] of topicPatterns) {
+            if (pattern.test(combined)) {
+              matchedTopics.push(label);
+            }
+          }
+
+          // Build the preview name
+          if (uniqueProperNouns.length > 0 && matchedTopics.length > 0) {
+            // Combine a proper noun with a topic: "Mom - Growing up in Tel Aviv"
+            const place = uniqueProperNouns.find(n => n.length > 3) || uniqueProperNouns[0];
+            preview = `${matchedTopics[0]} - ${place}`;
+          } else if (matchedTopics.length > 0) {
+            preview = matchedTopics.slice(0, 2).join(' & ');
+          } else if (uniqueProperNouns.length > 0) {
+            preview = `Stories about ${uniqueProperNouns.slice(0, 2).join(' & ')}`;
+          } else {
+            // Fallback: use first user message truncated
+            preview = userMessages[0].substring(0, 40) + (userMessages[0].length > 40 ? '...' : '');
+          }
         }
       } catch {
         // ignore

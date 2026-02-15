@@ -84,35 +84,48 @@ export default function InterviewPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Track accumulated transcript across recognition restarts
+  const accumulatedTranscriptRef = useRef('');
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
-        recognition.continuous = true;
+        recognition.continuous = false; // Single utterance mode - more reliable on mobile
         recognition.interimResults = true;
         recognition.onresult = (event) => {
-          let fullTranscript = '';
-          for (let i = 0; i < event.results.length; i++) {
-            fullTranscript += event.results[i][0].transcript;
+          let interimTranscript = '';
+          let finalTranscript = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript;
+            } else {
+              interimTranscript += transcript;
+            }
           }
-          setInput(fullTranscript);
+          if (finalTranscript) {
+            accumulatedTranscriptRef.current += finalTranscript;
+          }
+          setInput(accumulatedTranscriptRef.current + interimTranscript);
           setSpeechError(null);
         };
         recognition.onerror = (event) => {
+          // Don't stop listening on no-speech - just restart
+          if (event.error === 'no-speech') {
+            return;
+          }
           setIsListening(false);
           switch (event.error) {
             case 'not-allowed':
-              setSpeechError('Microphone access denied.');
-              break;
-            case 'no-speech':
-              setSpeechError('No speech detected.');
+              setSpeechError('Microphone access denied. Please allow microphone in your browser settings.');
               break;
             case 'audio-capture':
               setSpeechError('No microphone found.');
               break;
             case 'network':
-              setSpeechError('Network error.');
+              setSpeechError('Network error - speech recognition requires an internet connection.');
               break;
             case 'aborted':
               break;
@@ -120,13 +133,22 @@ export default function InterviewPage() {
               setSpeechError('Speech error. Try again.');
           }
         };
-        recognition.onend = () => setIsListening(false);
+        recognition.onend = () => {
+          // Auto-restart if still in listening mode (simulates continuous on mobile)
+          if (recognitionRef.current && isListening) {
+            try {
+              recognition.start();
+            } catch {
+              setIsListening(false);
+            }
+          }
+        };
         recognitionRef.current = recognition;
       } else {
         setSpeechSupported(false);
       }
     }
-  }, []);
+  }, [isListening]);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -289,6 +311,7 @@ export default function InterviewPage() {
       recognitionRef.current.stop();
       setIsListening(false);
     } else {
+      accumulatedTranscriptRef.current = '';
       setInput('');
       recognitionRef.current.lang = voiceLang || navigator.language || 'en-US';
       try {
@@ -374,7 +397,18 @@ export default function InterviewPage() {
         body: formData,
       });
 
-      if (!uploadRes.ok) throw new Error('Upload failed');
+      if (!uploadRes.ok) {
+        const errorData = await uploadRes.json().catch(() => ({}));
+        const errorMsg = errorData?.error || 'Upload failed';
+        if (errorMsg.includes('not configured') || uploadRes.status === 503) {
+          setSpeechError('Voice memo storage is not configured. Please use voice-to-text (mic button) instead.');
+        } else {
+          setSpeechError(`Failed to upload voice memo: ${errorMsg}`);
+        }
+        setLoading(false);
+        setSaveStatus('idle');
+        return;
+      }
       const { media } = await uploadRes.json();
 
       // Add audio message to UI
@@ -391,7 +425,7 @@ export default function InterviewPage() {
       setRecordingDuration(0);
 
       // Send to Claude with transcription note
-      const res = await fetch('/api/interview/message', {
+      const res = await fetch('/api/interview/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -403,7 +437,9 @@ export default function InterviewPage() {
       if (!res.ok) throw new Error('Failed to send');
       const data = await res.json();
 
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }]);
+      if (data.messages) {
+        setMessages(data.messages);
+      }
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
     } catch (error) {
