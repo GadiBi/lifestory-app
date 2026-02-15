@@ -29,13 +29,9 @@ export default async function DashboardPage() {
           <Link href="/dashboard" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
               <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                {/* Tree trunk */}
                 <path d="M12 22v-8" />
-                {/* Roots */}
                 <path d="M9 22c0-2 1-3 3-3s3 1 3 3" />
-                {/* Branches and leaves */}
                 <path d="M12 14c-4 0-7-3-7-7 0-2.5 1.5-4.5 4-5.5.5 2 2 3 3 3s2.5-1 3-3c2.5 1 4 3 4 5.5 0 4-3 7-7 7z" />
-                {/* Inner leaf detail */}
                 <path d="M12 6v5" />
                 <path d="M9.5 8.5L12 7l2.5 1.5" />
               </svg>
@@ -48,7 +44,13 @@ export default async function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </Link>
-            <Link href="/profile" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition">
+            <Link href="/settings" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition" title="Settings">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </Link>
+            <Link href="/profile" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition" title="Profile">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
@@ -73,20 +75,18 @@ export default async function DashboardPage() {
         {/* Story Reminder */}
         <StoryReminder />
 
-        {/* Primary Actions */}
+        {/* Row 1: Continue Conversation - Hero button (primary colored) */}
         <div className="space-y-3 mb-8">
-          {/* Continue Conversation - Hero button */}
           <ContinueConversationButton />
 
-          {/* Conversations + Begin New - Side by side */}
+          {/* Row 2: Conversations + Begin New - neutral style */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Conversations */}
             <Link
               href="/interview?history=true"
-              className="block w-full bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-2xl p-5 transition group"
+              className="block w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl p-5 transition group"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center text-primary flex-shrink-0">
+                <div className="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center text-slate-600 flex-shrink-0">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
@@ -95,19 +95,18 @@ export default async function DashboardPage() {
                   <h3 className="text-lg font-semibold text-slate-900">Conversations</h3>
                   <p className="text-slate-500 text-sm">View past conversations</p>
                 </div>
-                <svg className="w-5 h-5 text-primary/40 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
             </Link>
 
-            {/* Begin New Conversation */}
             <Link
               href="/interview?new=true"
-              className="block w-full bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-2xl p-5 transition group"
+              className="block w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl p-5 transition group"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center text-primary flex-shrink-0">
+                <div className="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center text-slate-600 flex-shrink-0">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
@@ -116,7 +115,7 @@ export default async function DashboardPage() {
                   <h3 className="text-lg font-semibold text-slate-900">Begin New Conversation</h3>
                   <p className="text-slate-500 text-sm">Start sharing new memories</p>
                 </div>
-                <svg className="w-5 h-5 text-primary/40 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </div>
@@ -124,15 +123,14 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Life Events & People - Side by side */}
+        {/* Row 3: Life Events + People - neutral style */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-          {/* Life Events */}
           <Link
             href="/timeline"
-            className="block w-full bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-2xl p-5 transition group"
+            className="block w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl p-5 transition group"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center text-primary flex-shrink-0">
+              <div className="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center text-slate-600 flex-shrink-0">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
@@ -141,19 +139,18 @@ export default async function DashboardPage() {
                 <h3 className="text-lg font-semibold text-slate-900">Life Events</h3>
                 <p className="text-slate-500 text-sm">View your timeline</p>
               </div>
-              <svg className="w-5 h-5 text-primary/40 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </div>
           </Link>
 
-          {/* People in My Life */}
           <Link
             href="/people"
-            className="block w-full bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-2xl p-5 transition group"
+            className="block w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl p-5 transition group"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center text-primary flex-shrink-0">
+              <div className="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center text-slate-600 flex-shrink-0">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
@@ -162,38 +159,38 @@ export default async function DashboardPage() {
                 <h3 className="text-lg font-semibold text-slate-900">People in My Life</h3>
                 <p className="text-slate-500 text-sm">Key people from your story</p>
               </div>
-              <svg className="w-5 h-5 text-primary/40 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </div>
           </Link>
         </div>
 
-        {/* Quick Actions */}
+        {/* Row 4: Quick Actions - each with distinct warm color */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <QuickAction
-            href="/timeline"
-            icon={<TimelineIcon />}
-            label="Timeline"
-            color="text-primary bg-primary/10"
-          />
           <QuickAction
             href="/life-script"
             icon={<BookIcon />}
             label="Life Script"
-            color="text-primary bg-primary/10"
+            color="text-purple-600 bg-purple-50"
+          />
+          <QuickAction
+            href="/life-script"
+            icon={<DownloadIcon />}
+            label="Download"
+            color="text-rose-600 bg-rose-50"
           />
           <QuickAction
             href="/upload"
             icon={<UploadIcon />}
             label="Photos"
-            color="text-primary bg-primary/10"
+            color="text-amber-600 bg-amber-50"
           />
           <QuickAction
             href="/share"
             icon={<ShareIcon />}
             label="Share"
-            color="text-primary bg-primary/10"
+            color="text-emerald-600 bg-emerald-50"
           />
         </div>
       </main>
@@ -221,10 +218,10 @@ function QuickAction({ href, icon, label, color }: {
   );
 }
 
-function TimelineIcon() {
+function DownloadIcon() {
   return (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
     </svg>
   );
 }
