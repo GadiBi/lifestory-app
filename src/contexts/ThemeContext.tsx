@@ -9,20 +9,20 @@ export interface ThemeConfig {
 }
 
 const DEFAULT_THEME: ThemeConfig = {
-  primaryColor: '#6366f1', // indigo
+  primaryColor: '#8B7EC8', // warm soft purple
   fontFamily: 'system',
   darkMode: false,
 };
 
 const THEME_COLORS = [
-  { id: 'indigo', color: '#6366f1', label: 'Indigo' },
-  { id: 'blue', color: '#3b82f6', label: 'Blue' },
-  { id: 'emerald', color: '#10b981', label: 'Emerald' },
-  { id: 'rose', color: '#f43f5e', label: 'Rose' },
-  { id: 'amber', color: '#f59e0b', label: 'Amber' },
-  { id: 'purple', color: '#8b5cf6', label: 'Purple' },
-  { id: 'teal', color: '#14b8a6', label: 'Teal' },
-  { id: 'slate', color: '#64748b', label: 'Slate' },
+  { id: 'mauve', color: '#8B7EC8', label: 'Soft Purple' },
+  { id: 'dusty-rose', color: '#C27A8E', label: 'Dusty Rose' },
+  { id: 'terracotta', color: '#C2785A', label: 'Terracotta' },
+  { id: 'warm-sand', color: '#B89B6D', label: 'Warm Sand' },
+  { id: 'sage', color: '#8FA68A', label: 'Sage' },
+  { id: 'plum', color: '#9B6B8E', label: 'Plum' },
+  { id: 'clay', color: '#A67B6B', label: 'Clay' },
+  { id: 'storm', color: '#7B8794', label: 'Storm' },
 ];
 
 const FONT_FAMILIES = [

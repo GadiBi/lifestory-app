@@ -52,15 +52,17 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 py-12">
       <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-sm border border-slate-200">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
-            <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22v-8" />
-              <path d="M9 22c0-2 1-3 3-3s3 1 3 3" />
-              <path d="M12 14c-4 0-7-3-7-7 0-2.5 1.5-4.5 4-5.5.5 2 2 3 3 3s2.5-1 3-3c2.5 1 4 3 4 5.5 0 4-3 7-7 7z" />
-              <path d="M12 6v5" />
-              <path d="M9.5 8.5L12 7l2.5 1.5" />
-            </svg>
-          </div>
+          <Link href="/" className="inline-block">
+            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22v-8" />
+                <path d="M9 22c0-2 1-3 3-3s3 1 3 3" />
+                <path d="M12 14c-4 0-7-3-7-7 0-2.5 1.5-4.5 4-5.5.5 2 2 3 3 3s2.5-1 3-3c2.5 1 4 3 4 5.5 0 4-3 7-7 7z" />
+                <path d="M12 6v5" />
+                <path d="M9.5 8.5L12 7l2.5 1.5" />
+              </svg>
+            </div>
+          </Link>
           <h1 className="text-2xl font-bold text-slate-900">Create Account</h1>
           <p className="text-slate-500 mt-2">Start documenting your life story</p>
         </div>

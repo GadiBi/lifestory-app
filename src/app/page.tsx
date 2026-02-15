@@ -14,7 +14,7 @@ export default async function HomePage() {
       {/* Navigation */}
       <nav className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2 sm:gap-3">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3">
             <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary rounded-xl flex items-center justify-center">
               <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 22v-8" />
@@ -25,7 +25,7 @@ export default async function HomePage() {
               </svg>
             </div>
             <span className="text-slate-900 font-bold text-xl">LifeStory</span>
-          </div>
+          </Link>
           <div className="flex items-center gap-2 sm:gap-4">
             <Link href="/login" className="text-sm sm:text-base text-slate-600 hover:text-slate-900 transition font-medium">
               Sign In

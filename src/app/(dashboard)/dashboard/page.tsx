@@ -13,15 +13,11 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  // Get user data and stats
-  const [user, eventCount, interviewCount] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: { profile: true },
-    }),
-    prisma.lifeEvent.count({ where: { userId: session.user.id } }),
-    prisma.interview.count({ where: { userId: session.user.id } }),
-  ]);
+  // Get user data
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: { profile: true },
+  });
 
   const displayName = user?.profile?.fullName || user?.username || session.user.name;
 
@@ -128,45 +124,47 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Life Events & Conversations - Side by side on desktop */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          {/* Life Events Card */}
-          <Link href="/timeline" className="block">
-            <div className="bg-slate-50 hover:bg-slate-100 rounded-2xl p-5 transition h-full">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 flex-shrink-0">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <div className="text-2xl font-bold text-slate-900">{eventCount}</div>
-                  <div className="text-slate-500 text-sm">Life Events</div>
-                </div>
-                <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        {/* Life Events & People - Side by side */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+          {/* Life Events */}
+          <Link
+            href="/timeline"
+            className="block w-full bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-2xl p-5 transition group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center text-primary flex-shrink-0">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-semibold text-slate-900">Life Events</h3>
+                <p className="text-slate-500 text-sm">View your timeline</p>
+              </div>
+              <svg className="w-5 h-5 text-primary/40 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </div>
           </Link>
 
-          {/* Conversations Card */}
-          <Link href="/interview?history=true" className="block">
-            <div className="bg-slate-50 hover:bg-slate-100 rounded-2xl p-5 transition h-full">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 flex-shrink-0">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <div className="text-2xl font-bold text-slate-900">{interviewCount}</div>
-                  <div className="text-slate-500 text-sm">Conversations</div>
-                </div>
-                <svg className="w-5 h-5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          {/* People in My Life */}
+          <Link
+            href="/people"
+            className="block w-full bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-2xl p-5 transition group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center text-primary flex-shrink-0">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-semibold text-slate-900">People in My Life</h3>
+                <p className="text-slate-500 text-sm">Key people from your story</p>
+              </div>
+              <svg className="w-5 h-5 text-primary/40 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </div>
           </Link>
         </div>
@@ -177,25 +175,25 @@ export default async function DashboardPage() {
             href="/timeline"
             icon={<TimelineIcon />}
             label="Timeline"
-            color="text-blue-600 bg-blue-50"
+            color="text-primary bg-primary/10"
           />
           <QuickAction
             href="/life-script"
             icon={<BookIcon />}
             label="Life Script"
-            color="text-purple-600 bg-purple-50"
+            color="text-primary bg-primary/10"
           />
           <QuickAction
             href="/upload"
             icon={<UploadIcon />}
             label="Photos"
-            color="text-amber-600 bg-amber-50"
+            color="text-primary bg-primary/10"
           />
           <QuickAction
             href="/share"
             icon={<ShareIcon />}
             label="Share"
-            color="text-green-600 bg-green-50"
+            color="text-primary bg-primary/10"
           />
         </div>
       </main>

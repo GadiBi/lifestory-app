@@ -5,10 +5,10 @@
   --background: #FAFBFC;
   --foreground: #1a1a2e;
 
-  /* Primary colors - can be overridden by ThemeContext */
-  --color-primary: #6366f1;
-  --color-primary-dark: #4f46e5;
-  --color-primary-light: #e0e7ff;
+  /* Primary colors - warm soft purple (can be overridden by ThemeContext) */
+  --color-primary: #8B7EC8;
+  --color-primary-dark: #7468B0;
+  --color-primary-light: #EDE8F5;
 
   /* Legacy primary variables for compatibility */
   --primary: var(--color-primary);
