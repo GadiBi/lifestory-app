@@ -13,24 +13,26 @@ export default async function HomePage() {
     <div className="min-h-screen bg-slate-50">
       {/* Navigation */}
       <nav className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-              {/* Open book with tree growing from it */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary rounded-xl flex items-center justify-center">
               <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 19.5v-15A2.5 2.5 0 016.5 2H12v17H6.5A2.5 2.5 0 014 19.5z" />
-                <path d="M20 19.5v-15A2.5 2.5 0 0017.5 2H12v17h5.5a2.5 2.5 0 002.5-2.5z" />
+                <path d="M12 22v-8" />
+                <path d="M9 22c0-2 1-3 3-3s3 1 3 3" />
+                <path d="M12 14c-4 0-7-3-7-7 0-2.5 1.5-4.5 4-5.5.5 2 2 3 3 3s2.5-1 3-3c2.5 1 4 3 4 5.5 0 4-3 7-7 7z" />
+                <path d="M12 6v5" />
+                <path d="M9.5 8.5L12 7l2.5 1.5" />
               </svg>
             </div>
             <span className="text-slate-900 font-bold text-xl">LifeStory</span>
           </div>
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="text-slate-600 hover:text-slate-900 transition font-medium">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <Link href="/login" className="text-sm sm:text-base text-slate-600 hover:text-slate-900 transition font-medium">
               Sign In
             </Link>
             <Link
               href="/signup"
-              className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg transition font-medium"
+              className="px-4 py-2 sm:px-5 sm:py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg transition font-medium text-sm sm:text-base"
             >
               Get Started
             </Link>
@@ -40,36 +42,36 @@ export default async function HomePage() {
 
       {/* Hero Section */}
       <main>
-        <div className="max-w-7xl mx-auto px-6 pt-20 pb-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 sm:pt-20 pb-16 sm:pb-32">
           {/* Hero Content */}
-          <div className="text-center max-w-3xl mx-auto mb-20">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-sm text-primary mb-8">
+          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-20">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-sm text-primary mb-6 sm:mb-8">
               <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
               Powered by Claude AI
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight mb-6">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-slate-900 leading-tight mb-4 sm:mb-6">
               Every Life Has a Story
               <span className="block mt-2 text-primary">
                 Worth Telling
               </span>
             </h1>
 
-            <p className="text-lg text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-slate-600 mb-8 sm:mb-10 leading-relaxed max-w-2xl mx-auto">
               Have meaningful conversations with an AI biographer that helps you discover,
               remember, and preserve your most precious memories. Transform your memories into a written legacy.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <Link
                 href="/signup"
-                className="px-8 py-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-lg transition text-lg"
+                className="px-6 py-3.5 sm:px-8 sm:py-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-lg transition text-base sm:text-lg"
               >
                 Start Your Story
               </Link>
               <Link
                 href="/login"
-                className="px-8 py-4 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-lg transition border border-slate-200 text-lg"
+                className="px-6 py-3.5 sm:px-8 sm:py-4 bg-white hover:bg-slate-50 text-slate-700 font-semibold rounded-lg transition border border-slate-200 text-base sm:text-lg"
               >
                 Continue Writing
               </Link>
@@ -77,7 +79,7 @@ export default async function HomePage() {
           </div>
 
           {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-20">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto mb-12 sm:mb-20">
             <FeatureCard
               icon="🎙️"
               title="Voice & Text"
@@ -107,9 +109,9 @@ export default async function HomePage() {
         </div>
 
         {/* Testimonial */}
-        <div className="bg-white border-y border-slate-200 py-16">
-          <div className="max-w-3xl mx-auto px-6 text-center">
-            <p className="text-xl text-slate-700 italic mb-6">
+        <div className="bg-white border-y border-slate-200 py-10 sm:py-16">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+            <p className="text-lg sm:text-xl text-slate-700 italic mb-6">
               "I never thought my ordinary life had stories worth telling.
               This helped me discover memories I'd forgotten and see my life in a whole new way."
             </p>
@@ -118,9 +120,9 @@ export default async function HomePage() {
         </div>
 
         {/* CTA Section */}
-        <div className="max-w-7xl mx-auto px-6 py-20 text-center">
-          <h2 className="text-3xl font-bold text-slate-900 mb-4">Ready to Begin?</h2>
-          <p className="text-lg text-slate-600 mb-8">Your story is waiting to be told. Start free today.</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">Ready to Begin?</h2>
+          <p className="text-base sm:text-lg text-slate-600 mb-8">Your story is waiting to be told. Start free today.</p>
           <Link
             href="/signup"
             className="inline-flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-lg transition text-lg"
@@ -134,8 +136,8 @@ export default async function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 py-8 bg-white">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <footer className="border-t border-slate-200 py-6 sm:py-8 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-slate-500 text-sm">© 2024 LifeStory. Your memories, beautifully preserved.</p>
           <p className="text-slate-500 text-sm">Private & Secure • Powered by Claude AI</p>
         </div>
