@@ -64,7 +64,7 @@ export default function InterviewPage() {
   // Generate a dynamic 3-word chat title from user messages
   const generateChatTitle = useCallback((msgs: Message[]) => {
     const userMsgs = msgs.filter(m => m.role === 'user').map(m => m.content);
-    if (userMsgs.length === 0) return null;
+    if (userMsgs.length === 0) return 'New Chat';
     const combined = userMsgs.join(' ').toLowerCase();
     const patterns: [RegExp, string][] = [
       [/\b(mom|mother|mama|ima)\b/i, 'Memories of Mom'],
@@ -587,9 +587,9 @@ export default function InterviewPage() {
           {showContinue && messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 sm:py-20">
               {/* Greeting with logo inline */}
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shrink-0">
-                  <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 22v-8" />
                     <path d="M9 22c0-2 1-3 3-3s3 1 3 3" />
                     <path d="M12 14c-4 0-7-3-7-7 0-2.5 1.5-4.5 4-5.5.5 2 2 3 3 3s2.5-1 3-3c2.5 1 4 3 4 5.5 0 4-3 7-7 7z" />
@@ -601,36 +601,48 @@ export default function InterviewPage() {
               </div>
 
               {/* Subtitle - bigger */}
-              <p className="text-xl font-medium text-slate-600 mb-10 text-center max-w-md">
+              <p className="text-2xl font-medium text-slate-600 mb-10 text-center max-w-md">
                 Let&apos;s continue building your life story
               </p>
 
-              {/* Continue Chat button - bigger, no icon */}
+              {/* Continue Chat button */}
               <button
                 onClick={handleContinueChat}
-                className="px-10 py-4 bg-primary hover:bg-primary-dark text-white rounded-xl transition font-semibold text-lg mb-12 shadow-sm"
+                className="px-10 py-4 bg-primary hover:bg-primary-dark text-white rounded-xl transition font-semibold text-lg mb-6 shadow-sm"
               >
                 Continue Chat
               </button>
 
-              {/* Quick Actions as simple text links */}
-              <div className="flex flex-col items-center gap-3">
+              {/* "or" divider */}
+              <p className="text-sm text-slate-400 mb-6">or</p>
+
+              {/* Quick Actions as colored text links with icons, left-aligned */}
+              <div className="flex flex-col items-start gap-3">
                 <Link
                   href="/upload"
-                  className="text-sm text-slate-500 hover:text-blue-600 transition"
+                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 transition"
                 >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
                   Upload a story or document
                 </Link>
                 <Link
                   href="/upload"
-                  className="text-sm text-slate-500 hover:text-amber-600 transition"
+                  className="flex items-center gap-2 text-sm text-amber-600 hover:text-amber-700 transition"
                 >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
                   Add photos and pictures
                 </Link>
                 <Link
                   href="/share"
-                  className="text-sm text-slate-500 hover:text-emerald-600 transition"
+                  className="flex items-center gap-2 text-sm text-emerald-600 hover:text-emerald-700 transition"
                 >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
                   Download and share your story
                 </Link>
               </div>

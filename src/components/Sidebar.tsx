@@ -123,7 +123,7 @@ export default function Sidebar({ expanded, isMobile, onClose }: SidebarProps) {
         <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
 
         {/* Drawer */}
-        <div className="fixed inset-y-0 left-0 w-72 bg-white z-50 shadow-xl flex flex-col animate-slide-in pt-14">
+        <div className="fixed inset-y-0 left-0 w-72 bg-slate-50 z-50 shadow-xl flex flex-col animate-slide-in pt-14">
           {/* Search bar */}
           <div className="px-3 pt-3 pb-1">
             <button
@@ -174,7 +174,7 @@ export default function Sidebar({ expanded, isMobile, onClose }: SidebarProps) {
   // Desktop collapsed: narrow icon rail
   if (!expanded) {
     return (
-      <div className="hidden md:flex fixed left-0 top-14 bottom-0 w-14 bg-white border-r border-slate-100 z-30 flex-col items-center py-2">
+      <div className="hidden md:flex fixed left-0 top-14 bottom-0 w-14 bg-slate-50 z-30 flex-col items-center py-2">
         <nav className="flex-1 flex flex-col items-center gap-1">
           {/* Search icon */}
           <div className="relative">
@@ -193,7 +193,7 @@ export default function Sidebar({ expanded, isMobile, onClose }: SidebarProps) {
             )}
           </div>
 
-          <div className="w-6 border-t border-slate-100 my-1" />
+          <div className="w-6 my-1" />
 
           {NAV_ITEMS.map((item) => (
             <div key={item.id} className="relative">
@@ -257,7 +257,7 @@ export default function Sidebar({ expanded, isMobile, onClose }: SidebarProps) {
 
   // Desktop expanded: full sidebar
   return (
-    <div className="hidden md:flex fixed left-0 top-14 bottom-0 w-72 bg-white border-r border-slate-100 z-30 flex-col animate-slide-in">
+    <div className="hidden md:flex fixed left-0 top-14 bottom-0 w-72 bg-slate-50 z-30 flex-col animate-slide-in">
       {/* Search bar */}
       <div className="px-3 pt-3 pb-1">
         <button
@@ -323,7 +323,7 @@ function SettingsIcon() {
 
 function SettingsButton({ pathname, navigate, showLabel }: { pathname: string; navigate: (href: string) => void; showLabel: boolean }) {
   return (
-    <div className="border-t border-slate-100 p-2">
+    <div className="p-2">
       <button
         onClick={() => navigate('/settings')}
         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
@@ -381,10 +381,12 @@ function ChatsList({
               <button
                 key={chat.id}
                 onClick={() => navigate(`/interview?id=${chat.id}`)}
-                className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 transition group"
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 transition group"
               >
                 <p className="text-sm text-slate-700 truncate">{chat.preview || 'New conversation'}</p>
-                <p className="text-xs text-slate-400 mt-0.5">{new Date(chat.updatedAt).toLocaleDateString()}</p>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {new Date(chat.createdAt).toLocaleDateString()} — {new Date(chat.updatedAt).toLocaleDateString()}
+                </p>
               </button>
             ))
           )}

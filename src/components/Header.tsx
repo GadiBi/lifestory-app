@@ -3,14 +3,18 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
   chatTitle?: string | null;
+  sidebarExpanded?: boolean;
+  isMobile?: boolean;
 }
 
-export default function Header({ onToggleSidebar, chatTitle }: HeaderProps) {
+export default function Header({ onToggleSidebar, chatTitle, sidebarExpanded, isMobile }: HeaderProps) {
   const { data: session } = useSession();
+  const router = useRouter();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -27,9 +31,15 @@ export default function Header({ onToggleSidebar, chatTitle }: HeaderProps) {
   const userName = session?.user?.name || 'User';
   const initials = userName.charAt(0).toUpperCase();
 
+  // Desktop padding to shift header content when sidebar is open
+  const headerPaddingLeft = isMobile ? undefined : sidebarExpanded ? '288px' : '56px';
+
   return (
-    <header className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-slate-100 z-40 flex items-center px-3">
-      {/* Left: Bow/Menu icon */}
+    <header
+      className="fixed top-0 left-0 right-0 h-14 bg-white z-40 flex items-center px-3 transition-all duration-200"
+      style={{ paddingLeft: headerPaddingLeft }}
+    >
+      {/* Left: Menu icon */}
       <button
         onClick={onToggleSidebar}
         className="p-2 rounded-lg hover:bg-slate-100 transition text-slate-600 mr-2"
@@ -39,6 +49,19 @@ export default function Header({ onToggleSidebar, chatTitle }: HeaderProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
+
+      {/* Search box when sidebar is expanded on desktop */}
+      {sidebarExpanded && !isMobile && (
+        <button
+          onClick={() => router.push('/search')}
+          className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:border-slate-300 hover:text-slate-500 transition text-sm mr-3"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          Search...
+        </button>
+      )}
 
       {/* Center/Left: Brand or Chat Title */}
       <div className="flex-1 flex items-center min-w-0">
@@ -53,13 +76,6 @@ export default function Header({ onToggleSidebar, chatTitle }: HeaderProps) {
             {chatTitle || 'LifeStory Agent'}
           </span>
         </div>
-
-        {/* Desktop: show chat title centered */}
-        {chatTitle && (
-          <span className="hidden md:inline ml-4 text-sm text-slate-500 truncate">
-            {chatTitle}
-          </span>
-        )}
       </div>
 
       {/* Right: User icon */}
