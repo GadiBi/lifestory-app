@@ -55,57 +55,40 @@ export async function GET() {
           .slice(0, 5); // Look at first 5 user messages
 
         if (userMessages.length > 0) {
-          // Combine user messages and extract key topics
           const combined = userMessages.join(' ').toLowerCase();
 
-          // Try to find proper nouns, places, people names from original text
-          const originalCombined = userMessages.join(' ');
-          const properNouns = originalCombined.match(/\b[A-Z][a-z]{2,}\b/g) || [];
-          const uniqueProperNouns = [...new Set(properNouns)].filter(
-            n => !['The', 'And', 'But', 'For', 'Not', 'You', 'She', 'His', 'Her', 'Was', 'Are', 'They', 'This', 'That', 'Would', 'Could', 'Should', 'Have', 'Been', 'When', 'What', 'How', 'Who', 'Why', 'Where'].includes(n)
-          );
-
-          // Topic keywords to look for
+          // Topic keywords to look for (all labels are 3 words)
           const topicPatterns: [RegExp, string][] = [
-            [/\b(mom|mother|mama|ima)\b/i, 'Mom'],
-            [/\b(dad|father|papa|abba|aba)\b/i, 'Dad'],
-            [/\b(grandm|grandmother|grandpa|grandfather|savta|saba)\b/i, 'Grandparents'],
-            [/\b(brother|sister|sibling)\b/i, 'Siblings'],
-            [/\b(school|teacher|class|university|college)\b/i, 'School days'],
-            [/\b(childhood|growing up|kid|young)\b/i, 'Childhood'],
-            [/\b(wedding|marriage|married|wife|husband)\b/i, 'Marriage'],
-            [/\b(army|military|service|soldier)\b/i, 'Military service'],
-            [/\b(immigrat|moved to|came to|left.*country)\b/i, 'Immigration'],
-            [/\b(cook|food|recipe|kitchen|meal)\b/i, 'Food & cooking'],
-            [/\b(work|job|career|office|business)\b/i, 'Career'],
-            [/\b(travel|trip|visit|vacation)\b/i, 'Travel'],
-            [/\b(war|conflict|survived)\b/i, 'Wartime'],
-            [/\b(music|song|sing|play|instrument)\b/i, 'Music'],
-            [/\b(sport|game|team|play)\b/i, 'Sports'],
-            [/\b(friend|friendship|best friend)\b/i, 'Friendships'],
-            [/\b(home|house|apartment|neighborhood|street)\b/i, 'Home'],
-            [/\b(birth|born|baby|pregnan)\b/i, 'Family beginnings'],
+            [/\b(mom|mother|mama|ima)\b/i, 'Memories of Mom'],
+            [/\b(dad|father|papa|abba|aba)\b/i, 'Memories of Dad'],
+            [/\b(grandm|grandmother|grandpa|grandfather|savta|saba)\b/i, 'Stories of Grandparents'],
+            [/\b(brother|sister|sibling)\b/i, 'My Sibling Stories'],
+            [/\b(school|teacher|class|university|college)\b/i, 'My School Days'],
+            [/\b(childhood|growing up|kid|young)\b/i, 'My Childhood Memories'],
+            [/\b(wedding|marriage|married|wife|husband)\b/i, 'Our Marriage Story'],
+            [/\b(army|military|service|soldier)\b/i, 'My Military Service'],
+            [/\b(immigrat|moved to|came to|left.*country)\b/i, 'My Immigration Story'],
+            [/\b(cook|food|recipe|kitchen|meal)\b/i, 'Food and Cooking'],
+            [/\b(work|job|career|office|business)\b/i, 'My Career Path'],
+            [/\b(travel|trip|visit|vacation)\b/i, 'My Travel Stories'],
+            [/\b(war|conflict|survived)\b/i, 'My Wartime Memories'],
+            [/\b(music|song|sing|play|instrument)\b/i, 'My Music Memories'],
+            [/\b(sport|game|team|play)\b/i, 'My Sports Memories'],
+            [/\b(friend|friendship|best friend)\b/i, 'Friends and Bonds'],
+            [/\b(home|house|apartment|neighborhood|street)\b/i, 'My Home Memories'],
+            [/\b(birth|born|baby|pregnan)\b/i, 'Our Family Beginnings'],
           ];
 
-          const matchedTopics: string[] = [];
           for (const [pattern, label] of topicPatterns) {
             if (pattern.test(combined)) {
-              matchedTopics.push(label);
+              preview = label;
+              break;
             }
           }
 
-          // Build the preview name
-          if (uniqueProperNouns.length > 0 && matchedTopics.length > 0) {
-            // Combine a proper noun with a topic: "Mom - Growing up in Tel Aviv"
-            const place = uniqueProperNouns.find(n => n.length > 3) || uniqueProperNouns[0];
-            preview = `${matchedTopics[0]} - ${place}`;
-          } else if (matchedTopics.length > 0) {
-            preview = matchedTopics.slice(0, 2).join(' & ');
-          } else if (uniqueProperNouns.length > 0) {
-            preview = `Stories about ${uniqueProperNouns.slice(0, 2).join(' & ')}`;
-          } else {
-            // Fallback: use first user message truncated
-            preview = userMessages[0].substring(0, 40) + (userMessages[0].length > 40 ? '...' : '');
+          // Fallback: first 3 words of first user message
+          if (!preview) {
+            preview = userMessages[0].split(/\s+/).slice(0, 3).join(' ');
           }
         }
       } catch {
