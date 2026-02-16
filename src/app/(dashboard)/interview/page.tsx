@@ -197,7 +197,14 @@ export default function InterviewPage() {
       loadInterview(resumeId);
       setInitializing(false);
     } else {
-      initializeInterview();
+      // Check if we've already shown the continue screen this session
+      const hasSeenContinue = sessionStorage.getItem('hasSeenContinue');
+      if (hasSeenContinue) {
+        // Skip continue screen, go straight to chat
+        initializeInterview(true);
+      } else {
+        initializeInterview(false);
+      }
     }
   }, [session, status, router, searchParams]);
 
@@ -222,7 +229,7 @@ export default function InterviewPage() {
     }
   }
 
-  async function initializeInterview() {
+  async function initializeInterview(skipContinue = false) {
     try {
       const profileRes = await fetch('/api/profile');
       if (profileRes.ok) {
@@ -244,8 +251,15 @@ export default function InterviewPage() {
       const data = await response.json();
       if (data.interview) {
         setInterview(data.interview);
-        // Show continue button instead of auto-loading messages
-        if (data.messages && data.messages.length > 0) {
+        if (skipContinue) {
+          // Go straight to chat - load messages directly
+          if (data.messages && data.messages.length > 0) {
+            setMessages(data.messages);
+          } else {
+            await getOpeningMessage(data.interview.id);
+          }
+        } else if (data.messages && data.messages.length > 0) {
+          // Show continue screen (first visit after login)
           setShowContinue(true);
         } else {
           // New interview with no messages - get opening message
@@ -262,6 +276,7 @@ export default function InterviewPage() {
   async function handleContinueChat() {
     if (!interview) return;
     setShowContinue(false);
+    sessionStorage.setItem('hasSeenContinue', 'true');
     setLoading(true);
     try {
       const response = await fetch('/api/interview/chat', {
@@ -564,85 +579,58 @@ export default function InterviewPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Live Feed Title - dynamic topic bar */}
-      {liveFeedTitle && messages.length > 0 && !showContinue && (
-        <div className="bg-slate-50 border-b border-slate-100 px-4 py-2">
-          <div className="max-w-3xl mx-auto">
-            <p className="text-sm text-slate-500 font-medium truncate">{liveFeedTitle}</p>
-          </div>
-        </div>
-      )}
-
       {/* Messages area */}
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 py-6">
           {/* Continue Landing Page */}
           {showContinue && messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 sm:py-20">
-              {/* Logo icon */}
-              <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-8">
-                <svg className="w-9 h-9 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22v-8" />
-                  <path d="M9 22c0-2 1-3 3-3s3 1 3 3" />
-                  <path d="M12 14c-4 0-7-3-7-7 0-2.5 1.5-4.5 4-5.5.5 2 2 3 3 3s2.5-1 3-3c2.5 1 4 3 4 5.5 0 4-3 7-7 7z" />
-                </svg>
+              {/* Greeting with logo inline */}
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shrink-0">
+                  <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22v-8" />
+                    <path d="M9 22c0-2 1-3 3-3s3 1 3 3" />
+                    <path d="M12 14c-4 0-7-3-7-7 0-2.5 1.5-4.5 4-5.5.5 2 2 3 3 3s2.5-1 3-3c2.5 1 4 3 4 5.5 0 4-3 7-7 7z" />
+                  </svg>
+                </div>
+                <h1 className="text-lg font-semibold text-slate-900">
+                  Hi {session?.user?.name || 'there'}
+                </h1>
               </div>
 
-              {/* Greeting */}
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2 text-center">
-                Hi {session?.user?.name || 'there'}
-              </h1>
-              <p className="text-lg text-slate-500 mb-8 text-center max-w-md">
-                Let&apos;s continue chat and build your life story
+              {/* Subtitle - bigger */}
+              <p className="text-xl font-medium text-slate-600 mb-10 text-center max-w-md">
+                Let&apos;s continue building your life story
               </p>
 
-              {/* Continue Chat button */}
+              {/* Continue Chat button - bigger, no icon */}
               <button
                 onClick={handleContinueChat}
-                className="px-8 py-3.5 bg-primary hover:bg-primary-dark text-white rounded-xl transition font-semibold text-lg flex items-center gap-2 mb-10 shadow-sm"
+                className="px-10 py-4 bg-primary hover:bg-primary-dark text-white rounded-xl transition font-semibold text-lg mb-12 shadow-sm"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                </svg>
                 Continue Chat
               </button>
 
-              {/* Quick Action Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-lg">
+              {/* Quick Actions as simple text links */}
+              <div className="flex flex-col items-center gap-3">
                 <Link
                   href="/upload"
-                  className="flex items-center gap-3 p-4 rounded-2xl border border-blue-100 bg-blue-50/50 hover:bg-blue-50 transition group"
+                  className="text-sm text-slate-500 hover:text-blue-600 transition"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium text-slate-700">Upload a Story</span>
+                  Upload a story or document
                 </Link>
-
                 <Link
                   href="/upload"
-                  className="flex items-center gap-3 p-4 rounded-2xl border border-amber-100 bg-amber-50/50 hover:bg-amber-50 transition group"
+                  className="text-sm text-slate-500 hover:text-amber-600 transition"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium text-slate-700">Upload Pictures</span>
+                  Add photos and pictures
                 </Link>
-
                 <Link
                   href="/share"
-                  className="flex items-center gap-3 p-4 rounded-2xl border border-emerald-100 bg-emerald-50/50 hover:bg-emerald-50 transition group"
+                  className="text-sm text-slate-500 hover:text-emerald-600 transition"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium text-slate-700">Download & Share</span>
+                  Download and share your story
                 </Link>
               </div>
             </div>

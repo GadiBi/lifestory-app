@@ -44,17 +44,17 @@ export default function Header({ onToggleSidebar, chatTitle }: HeaderProps) {
       <div className="flex-1 flex items-center min-w-0">
         {/* Desktop: brand on left, always visible */}
         <Link href="/interview" className="hidden md:flex items-center gap-2 shrink-0">
-          <span className="font-bold text-lg text-slate-900">Live Story</span>
+          <span className="font-bold text-lg text-primary">Live Story</span>
         </Link>
 
         {/* Mobile: centered brand or chat title */}
         <div className="md:hidden flex-1 text-center">
-          <span className="font-bold text-lg text-slate-900 truncate">
+          <span className="font-semibold text-base text-primary truncate">
             {chatTitle || 'Live Story'}
           </span>
         </div>
 
-        {/* Desktop: show chat title after brand */}
+        {/* Desktop: show chat title centered */}
         {chatTitle && (
           <span className="hidden md:inline ml-4 text-sm text-slate-500 truncate">
             {chatTitle}
@@ -63,7 +63,7 @@ export default function Header({ onToggleSidebar, chatTitle }: HeaderProps) {
       </div>
 
       {/* Right: User icon */}
-      <div className="relative" ref={menuRef}>
+      <div className="relative mr-2" ref={menuRef}>
         <button
           onClick={() => setUserMenuOpen(!userMenuOpen)}
           className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-medium hover:opacity-90 transition"

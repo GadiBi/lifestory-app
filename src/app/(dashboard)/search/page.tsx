@@ -28,7 +28,6 @@ interface ConversationMatch {
 }
 
 const PERIODS = [
-  { id: '', label: 'All Periods' },
   { id: 'early_childhood', label: 'Early Childhood (0-5)' },
   { id: 'childhood', label: 'Childhood (6-12)' },
   { id: 'teenage', label: 'Teenage (13-19)' },
@@ -37,28 +36,12 @@ const PERIODS = [
   { id: 'later_adult', label: 'Later Adult (56+)' },
 ];
 
-const CATEGORIES = [
-  { id: '', label: 'All Categories' },
-  { id: 'family', label: 'Family' },
-  { id: 'education', label: 'Education' },
-  { id: 'career', label: 'Career' },
-  { id: 'relationship', label: 'Relationship' },
-  { id: 'achievement', label: 'Achievement' },
-  { id: 'challenge', label: 'Challenge' },
-  { id: 'milestone', label: 'Milestone' },
-  { id: 'travel', label: 'Travel' },
-  { id: 'health', label: 'Health' },
-];
-
 export default function SearchPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const [query, setQuery] = useState(searchParams.get('q') || '');
-  const [type, setType] = useState<'all' | 'events' | 'conversations'>('all');
-  const [period, setPeriod] = useState('');
-  const [category, setCategory] = useState('');
   const [events, setEvents] = useState<LifeEvent[]>([]);
   const [conversations, setConversations] = useState<ConversationMatch[]>([]);
   const [loading, setLoading] = useState(false);
@@ -78,9 +61,7 @@ export default function SearchPage() {
     try {
       const params = new URLSearchParams({
         q: searchQuery,
-        type,
-        period,
-        category,
+        type: 'all',
       });
 
       const response = await fetch(`/api/search?${params}`);
@@ -93,7 +74,7 @@ export default function SearchPage() {
     } finally {
       setLoading(false);
     }
-  }, [type, period, category]);
+  }, []);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -178,41 +159,10 @@ export default function SearchPage() {
               )}
             </div>
 
-            {/* Filters */}
-            <div className="flex flex-wrap gap-2 mt-3">
-              <select
-                value={type}
-                onChange={(e) => setType(e.target.value as 'all' | 'events' | 'conversations')}
-                className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white"
-              >
-                <option value="all">All</option>
-                <option value="events">Events Only</option>
-                <option value="conversations">Conversations Only</option>
-              </select>
-
-              <select
-                value={period}
-                onChange={(e) => setPeriod(e.target.value)}
-                className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white"
-              >
-                {PERIODS.map(p => (
-                  <option key={p.id} value={p.id}>{p.label}</option>
-                ))}
-              </select>
-
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white"
-              >
-                {CATEGORIES.map(c => (
-                  <option key={c.id} value={c.id}>{c.label}</option>
-                ))}
-              </select>
-
+            <div className="flex justify-end mt-3">
               <button
                 type="submit"
-                className="px-4 py-1.5 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition"
+                className="px-5 py-2 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition"
               >
                 Search
               </button>

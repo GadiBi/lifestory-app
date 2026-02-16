@@ -203,22 +203,6 @@ export async function POST(request: Request) {
         });
       }
     } else if (startNew) {
-      // Clean up any truly empty interviews (no messages at all)
-      const emptyInterviews = await prisma.interview.findMany({
-        where: {
-          userId: session.user.id,
-          conversationLog: '[]',
-        },
-        select: { id: true },
-      });
-      if (emptyInterviews.length > 0) {
-        await prisma.interview.deleteMany({
-          where: {
-            id: { in: emptyInterviews.map(i => i.id) },
-          },
-        });
-      }
-
       // Check if there's an active interview with no user messages
       const activeInterview = await prisma.interview.findFirst({
         where: {
