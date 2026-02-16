@@ -42,8 +42,7 @@ export default function ContinueConversationButton() {
             <ChatIcon />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-slate-500">Continue Conversation</h3>
-            <p className="text-slate-400 text-sm">No previous conversations yet</p>
+            <h3 className="text-lg font-semibold text-slate-500">Continue</h3>
           </div>
         </div>
       </div>
@@ -61,14 +60,7 @@ export default function ContinueConversationButton() {
           <ChatIcon />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold">Continue Conversation</h3>
-          {lastActive ? (
-            <p className="text-white/70 text-sm line-clamp-1">{lastActive.preview || 'Resume your last conversation'}</p>
-          ) : loading ? (
-            <p className="text-white/50 text-sm">Loading...</p>
-          ) : (
-            <p className="text-white/70 text-sm">Resume your last conversation</p>
-          )}
+          <h3 className="text-lg font-semibold">Continue</h3>
         </div>
         <svg className="w-5 h-5 text-white/50 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

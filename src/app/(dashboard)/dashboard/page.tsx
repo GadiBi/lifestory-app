@@ -72,56 +72,32 @@ export default async function DashboardPage() {
         {/* Story Reminder */}
         <StoryReminder />
 
-        {/* Row 1: Continue Conversation - Hero button (primary colored) */}
-        <div className="space-y-3 mb-8">
+        {/* Row 1: Continue + New - 2 columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
           <ContinueConversationButton />
 
-          {/* Row 2: Conversations + Begin New - theme-tinted */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Link
-              href="/interview?history=true"
-              className="block w-full bg-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/80 border border-[var(--color-primary)]/15 rounded-2xl p-5 transition group hover:shadow-sm"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-[var(--color-primary)]/15 rounded-xl flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-semibold text-slate-900">Conversations</h3>
-                  <p className="text-slate-500 text-sm">View past conversations</p>
-                </div>
-                <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          <Link
+            href="/interview?new=true"
+            className="block w-full bg-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/80 border border-[var(--color-primary)]/15 rounded-2xl p-5 transition group hover:shadow-sm"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[var(--color-primary)]/15 rounded-xl flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
               </div>
-            </Link>
-
-            <Link
-              href="/interview?new=true"
-              className="block w-full bg-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/80 border border-[var(--color-primary)]/15 rounded-2xl p-5 transition group hover:shadow-sm"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-[var(--color-primary)]/15 rounded-xl flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-semibold text-slate-900">Begin New Conversation</h3>
-                  <p className="text-slate-500 text-sm">Start sharing new memories</p>
-                </div>
-                <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-semibold text-slate-900">New</h3>
               </div>
-            </Link>
-          </div>
+              <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </Link>
         </div>
 
-        {/* Row 3: Life Events + Life Script + People - theme-tinted, 3 columns */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+        {/* Row 2: My Events + My Story + My People + Conversations - 4 columns */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           <Link
             href="/timeline"
             className="block w-full bg-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/80 border border-[var(--color-primary)]/15 rounded-2xl p-4 transition group hover:shadow-sm"
@@ -133,8 +109,7 @@ export default async function DashboardPage() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-semibold text-slate-900">Life Events</h3>
-                <p className="text-slate-500 text-sm">View your timeline</p>
+                <h3 className="text-base font-semibold text-slate-900">My Events</h3>
               </div>
               <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -151,8 +126,7 @@ export default async function DashboardPage() {
                 <BookIcon />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-semibold text-slate-900">Life Script</h3>
-                <p className="text-slate-500 text-sm">Your written story</p>
+                <h3 className="text-base font-semibold text-slate-900">My Story</h3>
               </div>
               <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -171,8 +145,26 @@ export default async function DashboardPage() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-semibold text-slate-900">People in My Life</h3>
-                <p className="text-slate-500 text-sm">Key people from your story</p>
+                <h3 className="text-base font-semibold text-slate-900">My People</h3>
+              </div>
+              <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </Link>
+
+          <Link
+            href="/interview?history=true"
+            className="block w-full bg-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/80 border border-[var(--color-primary)]/15 rounded-2xl p-4 transition group hover:shadow-sm"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[var(--color-primary)]/15 rounded-xl flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-semibold text-slate-900">Conversations</h3>
               </div>
               <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
