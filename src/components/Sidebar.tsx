@@ -36,7 +36,7 @@ const NAV_ITEMS = [
   },
   {
     id: 'timeline',
-    label: 'My Events',
+    label: 'My Life Events',
     href: '/timeline',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,7 +46,7 @@ const NAV_ITEMS = [
   },
   {
     id: 'life-script',
-    label: 'My Story',
+    label: 'My Life Story',
     href: '/life-script',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
