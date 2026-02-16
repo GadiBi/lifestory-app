@@ -307,7 +307,7 @@ export default function PublicStoryPage({ params }: { params: Promise<{ code: st
             </svg>
             Create Your Own Life Story
           </Link>
-          <p className="text-xs text-slate-400 mt-4">Powered by Live Story</p>
+          <p className="text-xs text-slate-400 mt-4">Powered by LifeStory Agent</p>
         </div>
       </main>
 

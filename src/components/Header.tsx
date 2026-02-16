@@ -44,13 +44,13 @@ export default function Header({ onToggleSidebar, chatTitle }: HeaderProps) {
       <div className="flex-1 flex items-center min-w-0">
         {/* Desktop: brand on left, always visible */}
         <Link href="/interview" className="hidden md:flex items-center gap-2 shrink-0">
-          <span className="font-bold text-lg text-primary">Live Story</span>
+          <span className="font-bold text-lg text-primary">LifeStory Agent</span>
         </Link>
 
         {/* Mobile: centered brand or chat title */}
         <div className="md:hidden flex-1 text-center">
           <span className="font-semibold text-base text-primary truncate">
-            {chatTitle || 'Live Story'}
+            {chatTitle || 'LifeStory Agent'}
           </span>
         </div>
 

@@ -159,7 +159,7 @@ export default function SettingsPage() {
                   <path d="M12 14c-4 0-7-3-7-7 0-2.5 1.5-4.5 4-5.5.5 2 2 3 3 3s2.5-1 3-3c2.5 1 4 3 4 5.5 0 4-3 7-7 7z" />
                 </svg>
               </div>
-              <span className="font-bold text-slate-900">Live Story</span>
+              <span className="font-bold text-slate-900">LifeStory Agent</span>
             </div>
 
             <div className="space-y-2">

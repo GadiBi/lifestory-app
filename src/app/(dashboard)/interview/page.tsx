@@ -61,7 +61,7 @@ export default function InterviewPage() {
     { code: 'ja-JP', label: 'JA' },
   ];
 
-  // Generate a dynamic chat title from user messages
+  // Generate a dynamic 3-word chat title from user messages
   const generateChatTitle = useCallback((msgs: Message[]) => {
     const userMsgs = msgs.filter(m => m.role === 'user').map(m => m.content);
     if (userMsgs.length === 0) return null;
@@ -69,25 +69,26 @@ export default function InterviewPage() {
     const patterns: [RegExp, string][] = [
       [/\b(mom|mother|mama|ima)\b/i, 'Memories of Mom'],
       [/\b(dad|father|papa|abba|aba)\b/i, 'Memories of Dad'],
-      [/\b(grandm|grandmother|savta)\b/i, 'Grandma stories'],
-      [/\b(grandpa|grandfather|saba)\b/i, 'Grandpa stories'],
-      [/\b(school|teacher|class)\b/i, 'School days'],
-      [/\b(childhood|growing up|kid)\b/i, 'Childhood memories'],
-      [/\b(wedding|marriage|married)\b/i, 'Marriage'],
-      [/\b(army|military|service)\b/i, 'Military service'],
-      [/\b(immigrat|moved to|came to)\b/i, 'Immigration story'],
-      [/\b(cook|food|recipe|kitchen)\b/i, 'Food & cooking'],
-      [/\b(work|job|career|business)\b/i, 'Career memories'],
-      [/\b(travel|trip|vacation)\b/i, 'Travel stories'],
-      [/\b(friend|friendship)\b/i, 'Friendships'],
-      [/\b(home|house|neighborhood)\b/i, 'Home memories'],
-      [/\b(birth|born|baby)\b/i, 'Family beginnings'],
+      [/\b(grandm|grandmother|savta)\b/i, 'Stories of Grandma'],
+      [/\b(grandpa|grandfather|saba)\b/i, 'Stories of Grandpa'],
+      [/\b(school|teacher|class)\b/i, 'My School Days'],
+      [/\b(childhood|growing up|kid)\b/i, 'My Childhood Memories'],
+      [/\b(wedding|marriage|married)\b/i, 'Our Marriage Story'],
+      [/\b(army|military|service)\b/i, 'My Military Service'],
+      [/\b(immigrat|moved to|came to)\b/i, 'My Immigration Story'],
+      [/\b(cook|food|recipe|kitchen)\b/i, 'Food and Cooking'],
+      [/\b(work|job|career|business)\b/i, 'My Career Path'],
+      [/\b(travel|trip|vacation)\b/i, 'My Travel Stories'],
+      [/\b(friend|friendship)\b/i, 'Friends and Bonds'],
+      [/\b(home|house|neighborhood)\b/i, 'My Home Memories'],
+      [/\b(birth|born|baby)\b/i, 'Our Family Beginnings'],
     ];
     for (const [pattern, label] of patterns) {
       if (pattern.test(combined)) return label;
     }
-    // Fallback: first user message truncated
-    return userMsgs[0].substring(0, 30) + (userMsgs[0].length > 30 ? '...' : '');
+    // Fallback: first 3 words of first user message
+    const words = userMsgs[0].split(/\s+/).slice(0, 3).join(' ');
+    return words;
   }, []);
 
   // Update the header chat title when messages change
@@ -647,7 +648,7 @@ export default function InterviewPage() {
                           <path d="M12 12v3M12 10c-1.5 0-2.5-1-2.5-2.5S10.5 5 12 5s2.5 1 2.5 2.5S13.5 10 12 10z" />
                         </svg>
                       </div>
-                      <span className="text-xs font-medium text-slate-500">Live Story</span>
+                      <span className="text-xs font-medium text-slate-500">LifeStory Agent</span>
                     </div>
                   )}
                   <div className={`px-4 py-3 rounded-2xl ${
