@@ -16,7 +16,7 @@ interface PastChat {
 const NAV_ITEMS = [
   {
     id: 'interview',
-    label: 'Continue',
+    label: 'Continue Chat',
     href: '/interview',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
