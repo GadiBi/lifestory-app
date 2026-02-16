@@ -40,7 +40,7 @@ export async function GET() {
       },
     });
 
-    // Add message count and topic-based preview to each interview
+    // Add message count and topic-based preview, filter out empty chats
     const interviewsWithPreview = interviews.map(interview => {
       let messageCount = 0;
       let preview = '';
@@ -122,7 +122,13 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ interviews: interviewsWithPreview });
+    // Filter out chats with no user messages (empty chats)
+    const nonEmptyInterviews = interviewsWithPreview.filter(i => {
+      // Keep chats that have at least one user message (messageCount > 1 means has user + assistant)
+      return i.messageCount > 1 || i.preview !== '';
+    });
+
+    return NextResponse.json({ interviews: nonEmptyInterviews });
   } catch (error) {
     console.error('Get interviews error:', error);
     return NextResponse.json({ error: 'Failed to get interviews' }, { status: 500 });
@@ -197,6 +203,22 @@ export async function POST(request: Request) {
         });
       }
     } else if (startNew) {
+      // Clean up any truly empty interviews (no messages at all)
+      const emptyInterviews = await prisma.interview.findMany({
+        where: {
+          userId: session.user.id,
+          conversationLog: '[]',
+        },
+        select: { id: true },
+      });
+      if (emptyInterviews.length > 0) {
+        await prisma.interview.deleteMany({
+          where: {
+            id: { in: emptyInterviews.map(i => i.id) },
+          },
+        });
+      }
+
       // Check if there's an active interview with no user messages
       const activeInterview = await prisma.interview.findFirst({
         where: {

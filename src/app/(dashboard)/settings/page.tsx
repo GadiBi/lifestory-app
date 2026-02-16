@@ -32,42 +32,42 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-white">
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8 pt-16 space-y-8">
-        {/* Quick Actions - moved from dashboard */}
+        {/* Quick Actions */}
         <section className="bg-white rounded-2xl border border-slate-200 p-6">
           <h2 className="text-lg font-semibold text-slate-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-3 gap-3">
             <Link
-              href="/life-script"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-100 hover:border-slate-200 hover:shadow-sm transition"
+              href="/upload"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl border border-blue-100 bg-blue-50/30 hover:bg-blue-50 hover:shadow-sm transition"
             >
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center text-rose-500 bg-rose-50/70">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center text-blue-500 bg-blue-100/70">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <span className="text-sm font-medium text-slate-600">Download</span>
+              <span className="text-sm font-medium text-slate-600">Upload a Story</span>
             </Link>
             <Link
               href="/upload"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-100 hover:border-slate-200 hover:shadow-sm transition"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl border border-amber-100 bg-amber-50/30 hover:bg-amber-50 hover:shadow-sm transition"
             >
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center text-amber-500 bg-amber-50/70">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center text-amber-500 bg-amber-100/70">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <span className="text-sm font-medium text-slate-600">Upload</span>
+              <span className="text-sm font-medium text-slate-600">Upload Pictures</span>
             </Link>
             <Link
               href="/share"
-              className="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-100 hover:border-slate-200 hover:shadow-sm transition"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl border border-emerald-100 bg-emerald-50/30 hover:bg-emerald-50 hover:shadow-sm transition"
             >
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center text-emerald-500 bg-emerald-50/70">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center text-emerald-500 bg-emerald-100/70">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <span className="text-sm font-medium text-slate-600">Share</span>
+              <span className="text-sm font-medium text-slate-600">Download & Share</span>
             </Link>
           </div>
         </section>
@@ -159,7 +159,7 @@ export default function SettingsPage() {
                   <path d="M12 14c-4 0-7-3-7-7 0-2.5 1.5-4.5 4-5.5.5 2 2 3 3 3s2.5-1 3-3c2.5 1 4 3 4 5.5 0 4-3 7-7 7z" />
                 </svg>
               </div>
-              <span className="font-bold text-slate-900">LifeStory</span>
+              <span className="font-bold text-slate-900">Live Story</span>
             </div>
 
             <div className="space-y-2">

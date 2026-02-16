@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -15,15 +16,6 @@ interface Interview {
   currentPeriod: string;
   status: string;
 }
-
-const LIFE_PERIODS = [
-  { id: 'early_childhood', label: 'Early Childhood (0-5)' },
-  { id: 'childhood', label: 'Childhood (6-12)' },
-  { id: 'teenage', label: 'Teenage (13-19)' },
-  { id: 'young_adult', label: 'Young Adult (20-35)' },
-  { id: 'middle_adult', label: 'Middle Adult (36-55)' },
-  { id: 'later_adult', label: 'Later Adult (56+)' },
-];
 
 export default function InterviewPage() {
   const { data: session, status } = useSession();
@@ -45,6 +37,7 @@ export default function InterviewPage() {
   const [speechSupported, setSpeechSupported] = useState(true);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [showContinue, setShowContinue] = useState(false);
+  const [liveFeedTitle, setLiveFeedTitle] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   // Audio recording state
@@ -67,6 +60,51 @@ export default function InterviewPage() {
     { code: 'zh-CN', label: 'ZH' },
     { code: 'ja-JP', label: 'JA' },
   ];
+
+  // Generate a dynamic chat title from user messages
+  const generateChatTitle = useCallback((msgs: Message[]) => {
+    const userMsgs = msgs.filter(m => m.role === 'user').map(m => m.content);
+    if (userMsgs.length === 0) return null;
+    const combined = userMsgs.join(' ').toLowerCase();
+    const patterns: [RegExp, string][] = [
+      [/\b(mom|mother|mama|ima)\b/i, 'Memories of Mom'],
+      [/\b(dad|father|papa|abba|aba)\b/i, 'Memories of Dad'],
+      [/\b(grandm|grandmother|savta)\b/i, 'Grandma stories'],
+      [/\b(grandpa|grandfather|saba)\b/i, 'Grandpa stories'],
+      [/\b(school|teacher|class)\b/i, 'School days'],
+      [/\b(childhood|growing up|kid)\b/i, 'Childhood memories'],
+      [/\b(wedding|marriage|married)\b/i, 'Marriage'],
+      [/\b(army|military|service)\b/i, 'Military service'],
+      [/\b(immigrat|moved to|came to)\b/i, 'Immigration story'],
+      [/\b(cook|food|recipe|kitchen)\b/i, 'Food & cooking'],
+      [/\b(work|job|career|business)\b/i, 'Career memories'],
+      [/\b(travel|trip|vacation)\b/i, 'Travel stories'],
+      [/\b(friend|friendship)\b/i, 'Friendships'],
+      [/\b(home|house|neighborhood)\b/i, 'Home memories'],
+      [/\b(birth|born|baby)\b/i, 'Family beginnings'],
+    ];
+    for (const [pattern, label] of patterns) {
+      if (pattern.test(combined)) return label;
+    }
+    // Fallback: first user message truncated
+    return userMsgs[0].substring(0, 30) + (userMsgs[0].length > 30 ? '...' : '');
+  }, []);
+
+  // Update the header chat title when messages change
+  useEffect(() => {
+    const title = generateChatTitle(messages);
+    setLiveFeedTitle(title);
+    const setChatTitle = (window as unknown as Record<string, unknown>).__setChatTitle as ((t: string | null) => void) | undefined;
+    if (setChatTitle) setChatTitle(title);
+  }, [messages, generateChatTitle]);
+
+  // Clear chat title on unmount
+  useEffect(() => {
+    return () => {
+      const setChatTitle = (window as unknown as Record<string, unknown>).__setChatTitle as ((t: string | null) => void) | undefined;
+      if (setChatTitle) setChatTitle(null);
+    };
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -436,21 +474,6 @@ export default function InterviewPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
-  async function handlePeriodChange(newPeriod: string) {
-    if (!interview) return;
-    try {
-      const response = await fetch('/api/interview/period', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ interviewId: interview.id, period: newPeriod }),
-      });
-      const data = await response.json();
-      if (data.interview) setInterview(data.interview);
-    } catch (error) {
-      console.error('Failed to change period:', error);
-    }
-  }
-
   async function extractEvents() {
     if (!interview) return;
     setExtracting(true);
@@ -541,45 +564,87 @@ export default function InterviewPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Header - period selector only, logo handled by layout */}
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2 ml-14">
-            <select
-              value={interview?.currentPeriod || 'early_childhood'}
-              onChange={(e) => handlePeriodChange(e.target.value)}
-              className="text-sm text-slate-500 bg-transparent border-none focus:ring-0 cursor-pointer hover:text-slate-700"
-            >
-              {LIFE_PERIODS.map(p => (
-                <option key={p.id} value={p.id}>{p.label}</option>
-              ))}
-            </select>
+      {/* Live Feed Title - dynamic topic bar */}
+      {liveFeedTitle && messages.length > 0 && !showContinue && (
+        <div className="bg-slate-50 border-b border-slate-100 px-4 py-2">
+          <div className="max-w-3xl mx-auto">
+            <p className="text-sm text-slate-500 font-medium truncate">{liveFeedTitle}</p>
           </div>
         </div>
-      </header>
+      )}
 
       {/* Messages area */}
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 py-6">
-          {/* Privacy: Continue Chat button */}
+          {/* Continue Landing Page */}
           {showContinue && messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            <div className="flex flex-col items-center justify-center py-12 sm:py-20">
+              {/* Logo icon */}
+              <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mb-8">
+                <svg className="w-9 h-9 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22v-8" />
+                  <path d="M9 22c0-2 1-3 3-3s3 1 3 3" />
+                  <path d="M12 14c-4 0-7-3-7-7 0-2.5 1.5-4.5 4-5.5.5 2 2 3 3 3s2.5-1 3-3c2.5 1 4 3 4 5.5 0 4-3 7-7 7z" />
                 </svg>
               </div>
-              <h2 className="text-lg font-semibold text-slate-900 mb-2">Welcome back</h2>
-              <p className="text-slate-500 text-sm mb-6 text-center max-w-xs">Your previous conversation is ready. Tap below to continue where you left off.</p>
+
+              {/* Greeting */}
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2 text-center">
+                Hi {session?.user?.name || 'there'}
+              </h1>
+              <p className="text-lg text-slate-500 mb-8 text-center max-w-md">
+                Let&apos;s continue chat and build your life story
+              </p>
+
+              {/* Continue Chat button */}
               <button
                 onClick={handleContinueChat}
-                className="px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-xl transition font-medium flex items-center gap-2"
+                className="px-8 py-3.5 bg-primary hover:bg-primary-dark text-white rounded-xl transition font-semibold text-lg flex items-center gap-2 mb-10 shadow-sm"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                 </svg>
                 Continue Chat
               </button>
+
+              {/* Quick Action Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-lg">
+                <Link
+                  href="/upload"
+                  className="flex items-center gap-3 p-4 rounded-2xl border border-blue-100 bg-blue-50/50 hover:bg-blue-50 transition group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-slate-700">Upload a Story</span>
+                </Link>
+
+                <Link
+                  href="/upload"
+                  className="flex items-center gap-3 p-4 rounded-2xl border border-amber-100 bg-amber-50/50 hover:bg-amber-50 transition group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-slate-700">Upload Pictures</span>
+                </Link>
+
+                <Link
+                  href="/share"
+                  className="flex items-center gap-3 p-4 rounded-2xl border border-emerald-100 bg-emerald-50/50 hover:bg-emerald-50 transition group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm font-medium text-slate-700">Download & Share</span>
+                </Link>
+              </div>
             </div>
           )}
 
@@ -594,7 +659,7 @@ export default function InterviewPage() {
                           <path d="M12 12v3M12 10c-1.5 0-2.5-1-2.5-2.5S10.5 5 12 5s2.5 1 2.5 2.5S13.5 10 12 10z" />
                         </svg>
                       </div>
-                      <span className="text-xs font-medium text-slate-500">LifeStory</span>
+                      <span className="text-xs font-medium text-slate-500">Live Story</span>
                     </div>
                   )}
                   <div className={`px-4 py-3 rounded-2xl ${

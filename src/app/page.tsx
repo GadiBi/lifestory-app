@@ -24,7 +24,7 @@ export default async function HomePage() {
                 <path d="M9.5 8.5L12 7l2.5 1.5" />
               </svg>
             </div>
-            <span className="text-slate-900 font-bold text-xl">LifeStory</span>
+            <span className="text-slate-900 font-bold text-xl">Live Story</span>
           </Link>
           <div className="flex items-center gap-2 sm:gap-4">
             <Link href="/login" className="text-sm sm:text-base text-slate-600 hover:text-slate-900 transition font-medium">
@@ -138,7 +138,7 @@ export default async function HomePage() {
       {/* Footer */}
       <footer className="border-t border-slate-200 py-6 sm:py-8 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-slate-500 text-sm">© 2024 LifeStory. Your memories, beautifully preserved.</p>
+          <p className="text-slate-500 text-sm">© 2024 Live Story. Your memories, beautifully preserved.</p>
           <p className="text-slate-500 text-sm">Private & Secure • Powered by Claude AI</p>
         </div>
       </footer>

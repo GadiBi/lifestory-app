@@ -10,10 +10,10 @@ export default function NotFound() {
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
         <Link
-          href="/dashboard"
+          href="/interview"
           className="inline-block px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition"
         >
-          Go to Dashboard
+          Go Home
         </Link>
       </div>
     </div>

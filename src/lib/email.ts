@@ -14,9 +14,9 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   const resetLink = `${appUrl}/reset-password?token=${token}`;
 
   const { error } = await resend.emails.send({
-    from: process.env.EMAIL_FROM || 'LifeStory <noreply@lifestory.app>',
+    from: process.env.EMAIL_FROM || 'Live Story <noreply@lifestory.app>',
     to: email,
-    subject: 'Reset Your Password - LifeStory',
+    subject: 'Reset Your Password - Live Story',
     html: `
       <!DOCTYPE html>
       <html>
@@ -26,7 +26,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
         </head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #334155; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #0f766e; margin: 0;">LifeStory</h1>
+            <h1 style="color: #0f766e; margin: 0;">Live Story</h1>
           </div>
 
           <div style="background: #f8fafc; border-radius: 12px; padding: 30px; margin-bottom: 20px;">

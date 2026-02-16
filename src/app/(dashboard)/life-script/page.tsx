@@ -274,7 +274,7 @@ export default function LifeScriptPage() {
         <!-- Footer -->
         <div class="footer">
           <div class="ornament">❦</div>
-          <p>This story was lovingly preserved with LifeStory</p>
+          <p>This story was lovingly preserved with Live Story</p>
           <p>Every life has a story worth telling</p>
         </div>
       </body>
@@ -313,7 +313,7 @@ ${lifeScript}
 
 ${divider}
 
-This story was preserved with LifeStory
+This story was preserved with Live Story
 Every life has a story worth telling
 
 ${divider}

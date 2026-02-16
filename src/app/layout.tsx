@@ -14,15 +14,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LifeStory Agent",
+  title: "Live Story",
   description: "AI-powered biographer that helps you document your life story",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover",
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: 'any' },
       { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon.svg', type: 'image/svg+xml', sizes: '192x192' },
     ],
-    apple: '/apple-touch-icon.png',
+    apple: '/icon.svg',
   },
 };
 
