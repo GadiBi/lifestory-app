@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
 
 // GET /api/story/[code] - Get a shared story by code
 export async function GET(
@@ -45,7 +46,7 @@ export async function GET(
         }, { status: 401 });
       }
 
-      if (providedPassword !== sharedStory.password) {
+      if (!(await bcrypt.compare(providedPassword, sharedStory.password))) {
         return NextResponse.json({
           error: 'Invalid password',
           passwordProtected: true,

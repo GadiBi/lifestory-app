@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
+import { validateStringLength } from '@/lib/validation';
 
 // GET /api/share - Get user's shared stories
 export async function GET() {
@@ -33,8 +35,14 @@ export async function POST(request: Request) {
 
     const { title, isPublic, password, expiresIn, periods } = await request.json();
 
-    // Generate unique share code
-    const shareCode = crypto.randomBytes(8).toString('hex');
+    // Validate input
+    const titleError = title ? validateStringLength(title, 'title', 200) : null;
+    if (titleError) return NextResponse.json({ error: titleError }, { status: 400 });
+    const passwordError = password ? validateStringLength(password, 'password', 100) : null;
+    if (passwordError) return NextResponse.json({ error: passwordError }, { status: 400 });
+
+    // Generate unique share code (128-bit)
+    const shareCode = crypto.randomBytes(16).toString('hex');
 
     // Calculate expiration
     let expiresAt: Date | null = null;
@@ -86,7 +94,7 @@ export async function POST(request: Request) {
         shareCode,
         title: title || `${profile?.fullName || session.user.name}'s Life Story`,
         isPublic: isPublic || false,
-        password: password || null,
+        password: password ? await bcrypt.hash(password, 12) : null,
         expiresAt,
         content,
         periodsIncluded: periods ? periods.join(',') : null,

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { validateStringLength } from '@/lib/validation';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -57,6 +58,15 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     if (!existingEvent) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
+    }
+
+    if (title !== undefined) {
+      const titleError = validateStringLength(title, 'title', 200);
+      if (titleError) return NextResponse.json({ error: titleError }, { status: 400 });
+    }
+    if (description !== undefined) {
+      const descError = validateStringLength(description, 'description', 10000);
+      if (descError) return NextResponse.json({ error: descError }, { status: 400 });
     }
 
     const event = await prisma.lifeEvent.update({

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { chat, getOpeningMessage, type Message, type LifePeriod, type LifeEventSummary, type UsageInfo } from '@/lib/claude';
+import { validateStringLength } from '@/lib/validation';
 
 // Helper to save API usage
 async function saveUsage(userId: string, usage: UsageInfo, endpoint: string) {
@@ -138,6 +139,12 @@ export async function POST(request: Request) {
     }
 
     const { interviewId, message, startNew } = await request.json();
+
+    // Validate message length
+    if (message) {
+      const msgError = validateStringLength(message, 'message', 5000);
+      if (msgError) return NextResponse.json({ error: msgError }, { status: 400 });
+    }
 
     // Get user info for personalization
     const user = await prisma.user.findUnique({
@@ -293,10 +300,11 @@ export async function POST(request: Request) {
       previousMessages = [];
     }
 
-    // Load ALL life events from ALL interviews for this user
+    // Load recent life events for this user (limited for performance)
     const allLifeEventsRaw = await prisma.lifeEvent.findMany({
       where: { userId: session.user.id },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
     });
 
     // Convert to summary format for Claude
@@ -308,13 +316,14 @@ export async function POST(request: Request) {
       emotions: event.emotions,
     }));
 
-    // Load ALL other interviews to create conversation summaries
+    // Load recent other interviews to create conversation summaries (limited for performance)
     const otherInterviews = await prisma.interview.findMany({
       where: {
         userId: session.user.id,
-        id: { not: interview.id }, // Exclude current interview
+        id: { not: interview.id },
       },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { updatedAt: 'desc' },
+      take: 10,
       select: { conversationLog: true },
     });
 
@@ -327,7 +336,7 @@ export async function POST(request: Request) {
           // Create a meaningful summary including key exchanges
           const summary = pastMessages
             .map(m => `${m.role === 'user' ? userName : 'You'}: ${m.content.substring(0, 150)}${m.content.length > 150 ? '...' : ''}`)
-            .slice(0, 10) // Max 10 messages per conversation
+            .slice(0, 6) // Max 6 messages per conversation
             .join('\n');
           if (summary) {
             pastConversationSummaries.push(summary);

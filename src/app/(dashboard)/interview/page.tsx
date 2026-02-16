@@ -86,6 +86,12 @@ export default function InterviewPage() {
 
   // Track accumulated transcript across recognition restarts
   const accumulatedTranscriptRef = useRef('');
+  const isListeningRef = useRef(false);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    isListeningRef.current = isListening;
+  }, [isListening]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -135,7 +141,7 @@ export default function InterviewPage() {
         };
         recognition.onend = () => {
           // Auto-restart if still in listening mode (simulates continuous on mobile)
-          if (recognitionRef.current && isListening) {
+          if (recognitionRef.current && isListeningRef.current) {
             try {
               recognition.start();
             } catch {
@@ -148,7 +154,7 @@ export default function InterviewPage() {
         setSpeechSupported(false);
       }
     }
-  }, [isListening]);
+  }, []);
 
   useEffect(() => {
     if (status === 'loading') return;

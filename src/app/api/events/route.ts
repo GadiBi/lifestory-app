@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { validateStringLength } from '@/lib/validation';
 
 // GET /api/events - List all events for current user
 export async function GET(request: Request) {
@@ -62,6 +63,11 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    const titleError = validateStringLength(title, 'title', 200);
+    if (titleError) return NextResponse.json({ error: titleError }, { status: 400 });
+    const descError = validateStringLength(description, 'description', 10000);
+    if (descError) return NextResponse.json({ error: descError }, { status: 400 });
 
     const event = await prisma.lifeEvent.create({
       data: {

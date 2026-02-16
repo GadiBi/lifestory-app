@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import cloudinary from '@/lib/cloudinary';
+import { validateFileUpload } from '@/lib/validation';
 
 // GET /api/media - Get all user's media
 export async function GET(request: Request) {
@@ -53,6 +54,10 @@ export async function POST(request: Request) {
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
+
+    // Validate file size and type
+    const fileError = validateFileUpload(file, 20, ['image/*', 'audio/*', 'video/*']);
+    if (fileError) return NextResponse.json({ error: fileError }, { status: 400 });
 
     // Check if Cloudinary is configured
     if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {

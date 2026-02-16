@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { validateStringLength } from '@/lib/validation';
 
 // GET /api/profile - Get current user's profile
 export async function GET() {
@@ -42,6 +43,20 @@ export async function PUT(request: Request) {
     }
 
     const { username, fullName, birthDate, birthPlace, language } = await request.json();
+
+    // Validate input lengths
+    if (username) {
+      const err = validateStringLength(username, 'username', 50);
+      if (err) return NextResponse.json({ error: err }, { status: 400 });
+    }
+    if (fullName) {
+      const err = validateStringLength(fullName, 'fullName', 100);
+      if (err) return NextResponse.json({ error: err }, { status: 400 });
+    }
+    if (birthPlace) {
+      const err = validateStringLength(birthPlace, 'birthPlace', 200);
+      if (err) return NextResponse.json({ error: err }, { status: 400 });
+    }
 
     // Check if username is being changed and if it's already taken
     if (username) {

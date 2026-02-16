@@ -6,9 +6,9 @@
   --foreground: #1a1a2e;
 
   /* Primary colors - warm soft purple (can be overridden by ThemeContext) */
-  --color-primary: #8B7EC8;
-  --color-primary-dark: #7468B0;
-  --color-primary-light: #EDE8F5;
+  --color-primary: #A99AD4;
+  --color-primary-dark: #8B7EC8;
+  --color-primary-light: #F0ECF7;
 
   /* Legacy primary variables for compatibility */
   --primary: var(--color-primary);

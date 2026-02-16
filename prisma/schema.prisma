@@ -47,6 +47,8 @@ model LifeEvent {
   interview   Interview? @relation(fields: [interviewId], references: [id])
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   media       Media[]
+
+  @@index([userId])
 }
 
 model Interview {
@@ -59,6 +61,10 @@ model Interview {
   updatedAt       DateTime    @updatedAt
   user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   extractedEvents LifeEvent[]
+
+  @@index([userId])
+  @@index([userId, status])
+  @@index([userId, updatedAt])
 }
 
 model ApiUsage {
@@ -71,6 +77,8 @@ model ApiUsage {
   costUsd      Float
   createdAt    DateTime @default(now())
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model PasswordResetToken {
@@ -97,6 +105,8 @@ model Media {
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   lifeEventId String?
   lifeEvent   LifeEvent? @relation(fields: [lifeEventId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
 }
 
 model SharedStory {
@@ -114,4 +124,6 @@ model SharedStory {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

@@ -23,8 +23,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Top accent gradient line */}
+      <div className="h-1 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)]" />
+
       {/* Header */}
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
+      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-100 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
           <Link href="/dashboard" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
@@ -63,7 +66,7 @@ export default async function DashboardPage() {
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {/* Welcome */}
-        <div className="mb-8">
+        <div className="mb-8 rounded-2xl bg-gradient-to-br from-[var(--color-primary-light)]/40 to-white p-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">
             Welcome back, {displayName}
           </h1>
@@ -79,20 +82,20 @@ export default async function DashboardPage() {
         <div className="space-y-3 mb-8">
           <ContinueConversationButton />
 
-          {/* Row 2: Conversations + Begin New - neutral style */}
+          {/* Row 2: Conversations + Begin New - theme-tinted */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Link
               href="/interview?history=true"
-              className="block w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl p-5 transition group"
+              className="block w-full bg-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/80 border border-[var(--color-primary)]/15 rounded-2xl p-5 transition group hover:shadow-sm"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center text-slate-600 flex-shrink-0">
+                <div className="w-12 h-12 bg-[var(--color-primary)]/15 rounded-xl flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-slate-900">Conversations</h3>
+                  <h3 className="text-base font-semibold text-slate-900">Conversations</h3>
                   <p className="text-slate-500 text-sm">View past conversations</p>
                 </div>
                 <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,16 +106,16 @@ export default async function DashboardPage() {
 
             <Link
               href="/interview?new=true"
-              className="block w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl p-5 transition group"
+              className="block w-full bg-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/80 border border-[var(--color-primary)]/15 rounded-2xl p-5 transition group hover:shadow-sm"
             >
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center text-slate-600 flex-shrink-0">
+                <div className="w-12 h-12 bg-[var(--color-primary)]/15 rounded-xl flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-slate-900">Begin New Conversation</h3>
+                  <h3 className="text-base font-semibold text-slate-900">Begin New Conversation</h3>
                   <p className="text-slate-500 text-sm">Start sharing new memories</p>
                 </div>
                 <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,20 +126,20 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Row 3: Life Events + People - neutral style */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+        {/* Row 3: Life Events + Life Script + People - theme-tinted, 3 columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
           <Link
             href="/timeline"
-            className="block w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl p-5 transition group"
+            className="block w-full bg-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/80 border border-[var(--color-primary)]/15 rounded-2xl p-4 transition group hover:shadow-sm"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center text-slate-600 flex-shrink-0">
+              <div className="w-12 h-12 bg-[var(--color-primary)]/15 rounded-xl flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-slate-900">Life Events</h3>
+                <h3 className="text-base font-semibold text-slate-900">Life Events</h3>
                 <p className="text-slate-500 text-sm">View your timeline</p>
               </div>
               <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,17 +149,35 @@ export default async function DashboardPage() {
           </Link>
 
           <Link
-            href="/people"
-            className="block w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-2xl p-5 transition group"
+            href="/life-script"
+            className="block w-full bg-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/80 border border-[var(--color-primary)]/15 rounded-2xl p-4 transition group hover:shadow-sm"
           >
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-slate-200 rounded-xl flex items-center justify-center text-slate-600 flex-shrink-0">
+              <div className="w-12 h-12 bg-[var(--color-primary)]/15 rounded-xl flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
+                <BookIcon />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-semibold text-slate-900">Life Script</h3>
+                <p className="text-slate-500 text-sm">Your written story</p>
+              </div>
+              <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </Link>
+
+          <Link
+            href="/people"
+            className="block w-full bg-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/80 border border-[var(--color-primary)]/15 rounded-2xl p-4 transition group hover:shadow-sm"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-[var(--color-primary)]/15 rounded-xl flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-slate-900">People in My Life</h3>
+                <h3 className="text-base font-semibold text-slate-900">People in My Life</h3>
                 <p className="text-slate-500 text-sm">Key people from your story</p>
               </div>
               <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,14 +187,8 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        {/* Row 4: Quick Actions - each with distinct warm color */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <QuickAction
-            href="/life-script"
-            icon={<BookIcon />}
-            label="Life Script"
-            color="text-purple-600 bg-purple-50"
-          />
+        {/* Row 4: Quick Actions */}
+        <div className="grid grid-cols-3 gap-3">
           <QuickAction
             href="/life-script"
             icon={<DownloadIcon />}
@@ -183,7 +198,7 @@ export default async function DashboardPage() {
           <QuickAction
             href="/upload"
             icon={<UploadIcon />}
-            label="Photos"
+            label="Upload"
             color="text-amber-600 bg-amber-50"
           />
           <QuickAction
@@ -236,7 +251,7 @@ function UploadIcon() {
 
 function BookIcon() {
   return (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
     </svg>
   );

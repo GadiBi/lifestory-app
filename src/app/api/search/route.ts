@@ -20,6 +20,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ events: [], conversations: [] });
     }
 
+    if (query.length > 500) {
+      return NextResponse.json({ error: 'Query must be 500 characters or less' }, { status: 400 });
+    }
+
     const searchTerm = query.toLowerCase();
 
     // Search life events
