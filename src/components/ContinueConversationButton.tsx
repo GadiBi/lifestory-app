@@ -53,23 +53,23 @@ export default function ContinueConversationButton() {
   return (
     <Link
       href={href}
-      className="block w-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)] hover:brightness-105 text-white rounded-2xl p-5 transition group shadow-sm"
+      className="block w-full bg-[var(--color-primary-light)] hover:bg-[var(--color-primary-light)]/80 border border-[var(--color-primary)]/20 rounded-2xl p-5 transition group hover:shadow-sm"
     >
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+        <div className="w-12 h-12 bg-[var(--color-primary)]/15 rounded-xl flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
           <ChatIcon />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold">Continue Conversation</h3>
+          <h3 className="text-lg font-semibold text-slate-900">Continue Conversation</h3>
           {lastActive ? (
-            <p className="text-white/70 text-sm line-clamp-2">{lastActive.preview || 'Resume your last conversation'}</p>
+            <p className="text-slate-500 text-sm line-clamp-1">{lastActive.preview || 'Resume your last conversation'}</p>
           ) : loading ? (
-            <p className="text-white/50 text-sm">Loading...</p>
+            <p className="text-slate-400 text-sm">Loading...</p>
           ) : (
-            <p className="text-white/70 text-sm">Resume your last conversation</p>
+            <p className="text-slate-500 text-sm">Resume your last conversation</p>
           )}
         </div>
-        <svg className="w-5 h-5 text-white/50 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </div>

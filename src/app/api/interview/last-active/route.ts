@@ -31,15 +31,12 @@ export async function GET() {
         const hasUserMessages = messages.some((m: { role: string }) => m.role === 'user');
 
         if (hasUserMessages) {
-          // Build a short summary from the last few messages
-          const recentMessages = messages.slice(-4);
-          const preview = recentMessages
-            .map((m: { role: string; content: string }) => {
-              const prefix = m.role === 'user' ? 'You' : 'AI';
-              const text = m.content.substring(0, 60).replace(/\n/g, ' ').trim();
-              return `${prefix}: ${text}${m.content.length > 60 ? '...' : ''}`;
-            })
-            .join(' · ');
+          // Short preview — just 3 words from last user message
+          const lastUserMsg = [...messages].reverse().find((m: { role: string }) => m.role === 'user');
+          const words = lastUserMsg ? lastUserMsg.content.replace(/\n/g, ' ').trim().split(/\s+/) : [];
+          const preview = words.length > 0
+            ? words.slice(0, 3).join(' ') + (words.length > 3 ? '...' : '')
+            : '';
 
           return NextResponse.json({
             interview: {
