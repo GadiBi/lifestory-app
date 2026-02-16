@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -15,16 +14,6 @@ interface Interview {
   id: string;
   currentPeriod: string;
   status: string;
-}
-
-interface PastInterview {
-  id: string;
-  currentPeriod: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  messageCount: number;
-  preview: string;
 }
 
 const LIFE_PERIODS = [
@@ -50,13 +39,12 @@ export default function InterviewPage() {
   const [extracting, setExtracting] = useState(false);
   const [undoing, setUndoing] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
-  const [pastInterviews, setPastInterviews] = useState<PastInterview[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [voiceLang, setVoiceLang] = useState('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [speechSupported, setSpeechSupported] = useState(true);
   const [speechError, setSpeechError] = useState<string | null>(null);
+  const [showContinue, setShowContinue] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   // Audio recording state
@@ -98,7 +86,7 @@ export default function InterviewPage() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
-        recognition.continuous = false; // Single utterance mode - more reliable on mobile
+        recognition.continuous = false;
         recognition.interimResults = true;
         recognition.onresult = (event) => {
           let interimTranscript = '';
@@ -118,7 +106,6 @@ export default function InterviewPage() {
           setSpeechError(null);
         };
         recognition.onerror = (event) => {
-          // Don't stop listening on no-speech - just restart
           if (event.error === 'no-speech') {
             return;
           }
@@ -140,7 +127,6 @@ export default function InterviewPage() {
           }
         };
         recognition.onend = () => {
-          // Auto-restart if still in listening mode (simulates continuous on mobile)
           if (recognitionRef.current && isListeningRef.current) {
             try {
               recognition.start();
@@ -163,14 +149,9 @@ export default function InterviewPage() {
       return;
     }
     const startNew = searchParams.get('new') === 'true';
-    const openHistory = searchParams.get('history') === 'true';
     const resumeId = searchParams.get('id');
 
-    if (openHistory) {
-      router.replace('/interview');
-      setShowHistory(true);
-      initializeInterview();
-    } else if (startNew) {
+    if (startNew) {
       router.replace('/interview');
       startNewInterview();
     } else if (resumeId) {
@@ -182,21 +163,9 @@ export default function InterviewPage() {
     }
   }, [session, status, router, searchParams]);
 
-  async function loadPastInterviews() {
-    try {
-      const res = await fetch('/api/interview/chat');
-      if (res.ok) {
-        const data = await res.json();
-        setPastInterviews(data.interviews || []);
-      }
-    } catch (error) {
-      console.error('Failed to load past interviews:', error);
-    }
-  }
-
   async function loadInterview(interviewId: string) {
     setLoading(true);
-    setShowHistory(false);
+    setShowContinue(false);
     try {
       const response = await fetch('/api/interview/chat', {
         method: 'POST',
@@ -215,20 +184,6 @@ export default function InterviewPage() {
     }
   }
 
-  async function deleteInterview(interviewId: string, e: React.MouseEvent) {
-    e.stopPropagation();
-    if (!confirm('Delete this conversation?')) return;
-    try {
-      const response = await fetch(`/api/interview/${interviewId}`, { method: 'DELETE' });
-      if (response.ok) {
-        setPastInterviews(prev => prev.filter(p => p.id !== interviewId));
-        if (interview?.id === interviewId) await startNewInterview();
-      }
-    } catch (error) {
-      console.error('Failed to delete:', error);
-    }
-  }
-
   async function initializeInterview() {
     try {
       const profileRes = await fetch('/api/profile');
@@ -242,7 +197,7 @@ export default function InterviewPage() {
           setVoiceLang(langMap[profileData.profile.language] || '');
         }
       }
-      await loadPastInterviews();
+      // Get or create interview but don't load messages yet (privacy)
       const response = await fetch('/api/interview/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -251,8 +206,11 @@ export default function InterviewPage() {
       const data = await response.json();
       if (data.interview) {
         setInterview(data.interview);
-        setMessages(data.messages || []);
-        if (!data.messages || data.messages.length === 0) {
+        // Show continue button instead of auto-loading messages
+        if (data.messages && data.messages.length > 0) {
+          setShowContinue(true);
+        } else {
+          // New interview with no messages - get opening message
           await getOpeningMessage(data.interview.id);
         }
       }
@@ -260,6 +218,27 @@ export default function InterviewPage() {
       console.error('Failed to initialize:', error);
     } finally {
       setInitializing(false);
+    }
+  }
+
+  async function handleContinueChat() {
+    if (!interview) return;
+    setShowContinue(false);
+    setLoading(true);
+    try {
+      const response = await fetch('/api/interview/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ interviewId: interview.id }),
+      });
+      const data = await response.json();
+      if (data.messages) {
+        setMessages(data.messages);
+      }
+    } catch (error) {
+      console.error('Failed to load messages:', error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -330,7 +309,6 @@ export default function InterviewPage() {
     }
   }
 
-  // Audio recording functions
   async function startAudioRecording() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -393,7 +371,6 @@ export default function InterviewPage() {
     setSaveStatus('saving');
 
     try {
-      // Upload audio to server
       const formData = new FormData();
       formData.append('file', audioBlob, 'voice-memo.webm');
       formData.append('title', 'Voice Memo');
@@ -417,7 +394,6 @@ export default function InterviewPage() {
       }
       const { media } = await uploadRes.json();
 
-      // Add audio message to UI
       const userMessage: Message = {
         role: 'user',
         content: '🎤 Voice memo',
@@ -425,12 +401,10 @@ export default function InterviewPage() {
       };
       setMessages(prev => [...prev, userMessage]);
 
-      // Clear audio state
       setAudioBlob(null);
       setAudioUrl(null);
       setRecordingDuration(0);
 
-      // Send to Claude with transcription note
       const res = await fetch('/api/interview/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -497,18 +471,15 @@ export default function InterviewPage() {
 
   async function undoLastMessage() {
     if (!interview || messages.length < 1 || !canUndo) return;
-    // Grab the last user message text before deleting
     const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
     setUndoing(true);
     try {
-      // Delete last message (AI response)
       let response = await fetch('/api/interview/message', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ interviewId: interview.id }),
       });
       let data = await response.json();
-      // If the last deleted was an AI message and there's still a user message to remove, delete again
       if (response.ok && data.messages) {
         const lastMsg = messages[messages.length - 1];
         if (lastMsg?.role === 'assistant' && data.messages.length > 0) {
@@ -523,7 +494,6 @@ export default function InterviewPage() {
           setMessages(data.messages);
         }
       }
-      // Put the last user message back in the input for editing
       if (lastUserMsg) {
         setInput(lastUserMsg.content);
       }
@@ -538,7 +508,7 @@ export default function InterviewPage() {
   async function startNewInterview() {
     setInitializing(true);
     setMessages([]);
-    setShowHistory(false);
+    setShowContinue(false);
     try {
       const response = await fetch('/api/interview/chat', {
         method: 'POST',
@@ -550,7 +520,6 @@ export default function InterviewPage() {
         setInterview(data.interview);
         if (data.messages) setMessages(data.messages);
         else await getOpeningMessage(data.interview.id);
-        await loadPastInterviews();
       }
     } catch (error) {
       console.error('Failed to start new:', error);
@@ -572,92 +541,48 @@ export default function InterviewPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Header - Clean minimal design */}
+      {/* Header - period selector only, logo handled by layout */}
       <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Link href="/dashboard" className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-50 transition">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </Link>
-            <div className="flex items-center gap-2">
-              <Link href="/dashboard" className="text-base font-medium text-slate-800 hover:text-primary transition">LifeStory</Link>
-              <span className="text-slate-300">|</span>
-              <select
-                value={interview?.currentPeriod || 'early_childhood'}
-                onChange={(e) => handlePeriodChange(e.target.value)}
-                className="text-sm text-slate-500 bg-transparent border-none focus:ring-0 cursor-pointer hover:text-slate-700"
-              >
-                {LIFE_PERIODS.map(p => (
-                  <option key={p.id} value={p.id}>{p.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setShowHistory(!showHistory)}
-              className={`p-2 rounded-full transition ${showHistory ? 'bg-primary/10 text-primary' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'}`}
-              title="History"
+          <div className="flex items-center gap-2 ml-14">
+            <select
+              value={interview?.currentPeriod || 'early_childhood'}
+              onChange={(e) => handlePeriodChange(e.target.value)}
+              className="text-sm text-slate-500 bg-transparent border-none focus:ring-0 cursor-pointer hover:text-slate-700"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </button>
+              {LIFE_PERIODS.map(p => (
+                <option key={p.id} value={p.id}>{p.label}</option>
+              ))}
+            </select>
           </div>
         </div>
       </header>
 
-      {/* History Panel */}
-      {showHistory && (
-        <div className="bg-slate-50 border-b border-slate-100">
-          <div className="max-w-3xl mx-auto px-4 py-4">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-sm font-medium text-slate-700">Past Conversations</h3>
-              <button onClick={() => setShowHistory(false)} className="text-slate-400 hover:text-slate-600">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            {pastInterviews.length === 0 ? (
-              <p className="text-sm text-slate-400 py-3 text-center">No past conversations</p>
-            ) : (
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {pastInterviews.map((pi) => (
-                  <div
-                    key={pi.id}
-                    onClick={() => loadInterview(pi.id)}
-                    className={`p-3 rounded-xl cursor-pointer transition ${
-                      interview?.id === pi.id ? 'bg-white border border-primary/20 shadow-sm' : 'bg-white hover:shadow-sm'
-                    }`}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-slate-700 truncate">{pi.preview || 'New conversation'}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">{new Date(pi.updatedAt).toLocaleDateString()}</p>
-                      </div>
-                      <button
-                        onClick={(e) => deleteInterview(pi.id, e)}
-                        className="p-1.5 text-slate-300 hover:text-red-500 rounded-full hover:bg-red-50 ml-2"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Messages - Clean ChatGPT/Gemini style */}
+      {/* Messages area */}
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 py-6">
+          {/* Privacy: Continue Chat button */}
+          {showContinue && messages.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <h2 className="text-lg font-semibold text-slate-900 mb-2">Welcome back</h2>
+              <p className="text-slate-500 text-sm mb-6 text-center max-w-xs">Your previous conversation is ready. Tap below to continue where you left off.</p>
+              <button
+                onClick={handleContinueChat}
+                className="px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-xl transition font-medium flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                </svg>
+                Continue Chat
+              </button>
+            </div>
+          )}
+
           <div className="space-y-6">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -708,10 +633,9 @@ export default function InterviewPage() {
         </div>
       </main>
 
-      {/* Input - Clean minimal design */}
+      {/* Input */}
       <footer className="bg-white border-t border-slate-100 pb-safe">
         <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
-          {/* Status indicators */}
           {speechError && (
             <div className="mb-3 flex items-center justify-center gap-2 py-2 px-3 bg-amber-50 rounded-lg text-sm text-amber-700">
               <span>{speechError}</span>
@@ -793,7 +717,6 @@ export default function InterviewPage() {
             </div>
           )}
 
-          {/* Input form */}
           <form onSubmit={sendMessage} className="flex items-end gap-2">
             <div className="flex-1 relative">
               <textarea
@@ -817,7 +740,6 @@ export default function InterviewPage() {
             </div>
 
             <div className="flex items-center gap-1">
-              {/* Voice-to-text button */}
               <button
                 type="button"
                 onClick={toggleListening}
@@ -836,7 +758,6 @@ export default function InterviewPage() {
                 </svg>
               </button>
 
-              {/* Audio recording button */}
               <button
                 type="button"
                 onClick={isRecordingAudio ? stopAudioRecording : startAudioRecording}
@@ -860,7 +781,6 @@ export default function InterviewPage() {
                 </svg>
               </button>
 
-              {/* Send button */}
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
@@ -873,7 +793,6 @@ export default function InterviewPage() {
             </div>
           </form>
 
-          {/* Bottom controls - minimal */}
           <div className="flex items-center justify-between mt-3 px-1">
             <div className="flex items-center gap-3">
               <button

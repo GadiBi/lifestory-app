@@ -17,6 +17,13 @@ export const metadata: Metadata = {
   title: "LifeStory Agent",
   description: "AI-powered biographer that helps you document your life story",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover",
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default function RootLayout({

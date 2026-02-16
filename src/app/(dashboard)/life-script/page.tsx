@@ -349,12 +349,7 @@ ${divider}
     <div className="min-h-screen bg-white">
       <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </Link>
+          <div className="flex items-center gap-3 ml-14">
             <div>
               <h1 className="text-xl font-semibold text-slate-900">Life Script</h1>
               <p className="text-sm text-slate-500">Your written biography</p>

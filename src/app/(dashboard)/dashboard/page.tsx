@@ -1,7 +1,6 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import SignOutButton from '@/components/SignOutButton';
 import ContinueConversationButton from '@/components/ContinueConversationButton';
 import StoryReminder from '@/components/StoryReminder';
 import { prisma } from '@/lib/prisma';
@@ -25,37 +24,6 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-white">
       {/* Top accent gradient line */}
       <div className="h-1 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)]" />
-
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-100 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22v-8" />
-                <path d="M9 22c0-2 1-3 3-3s3 1 3 3" />
-                <path d="M12 14c-4 0-7-3-7-7 0-2.5 1.5-4.5 4-5.5.5 2 2 3 3 3s2.5-1 3-3c2.5 1 4 3 4 5.5 0 4-3 7-7 7z" />
-                <path d="M12 6v5" />
-                <path d="M9.5 8.5L12 7l2.5 1.5" />
-              </svg>
-            </div>
-            <span className="text-slate-900 font-semibold text-xl hidden sm:block">LifeStory</span>
-          </Link>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link href="/search" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition" title="Search">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </Link>
-            <Link href="/profile" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition" title="Profile">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </Link>
-            <SignOutButton />
-          </div>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
@@ -164,7 +132,7 @@ export default async function DashboardPage() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-semibold text-slate-900">Conversations</h3>
+                <h3 className="text-base font-semibold text-slate-900">Chats</h3>
               </div>
               <svg className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -173,73 +141,11 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        {/* Row 4: Quick Actions */}
-        <div className="grid grid-cols-4 gap-3">
-          <QuickAction
-            href="/life-script"
-            icon={<DownloadIcon />}
-            label="Download"
-            color="text-rose-500 bg-rose-50/70"
-          />
-          <QuickAction
-            href="/upload"
-            icon={<UploadIcon />}
-            label="Upload"
-            color="text-amber-500 bg-amber-50/70"
-          />
-          <QuickAction
-            href="/share"
-            icon={<ShareIcon />}
-            label="Share"
-            color="text-emerald-500 bg-emerald-50/70"
-          />
-          <QuickAction
-            href="/settings"
-            icon={<SettingsIcon />}
-            label="Settings"
-            color="text-sky-500 bg-sky-50/70"
-          />
-        </div>
       </main>
     </div>
   );
 }
 
-function QuickAction({ href, icon, label, color }: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  color: string;
-}) {
-  return (
-    <Link href={href}>
-      <div className="bg-white border border-slate-100 rounded-xl p-4 hover:border-slate-200 hover:shadow-sm transition cursor-pointer">
-        <div className="flex flex-col items-center text-center gap-2">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}>
-            {icon}
-          </div>
-          <span className="text-sm font-medium text-slate-600">{label}</span>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function DownloadIcon() {
-  return (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
-  );
-}
-
-function UploadIcon() {
-  return (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-    </svg>
-  );
-}
 
 function BookIcon() {
   return (
@@ -249,19 +155,3 @@ function BookIcon() {
   );
 }
 
-function ShareIcon() {
-  return (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-    </svg>
-  );
-}
-
-function SettingsIcon() {
-  return (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
-  );
-}
