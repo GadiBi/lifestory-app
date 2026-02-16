@@ -497,18 +497,37 @@ export default function InterviewPage() {
 
   async function undoLastMessage() {
     if (!interview || messages.length < 1 || !canUndo) return;
+    // Grab the last user message text before deleting
+    const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
     setUndoing(true);
     try {
-      const response = await fetch('/api/interview/message', {
+      // Delete last message (AI response)
+      let response = await fetch('/api/interview/message', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ interviewId: interview.id }),
       });
-      const data = await response.json();
+      let data = await response.json();
+      // If the last deleted was an AI message and there's still a user message to remove, delete again
       if (response.ok && data.messages) {
-        setMessages(data.messages);
-        setCanUndo(false);
+        const lastMsg = messages[messages.length - 1];
+        if (lastMsg?.role === 'assistant' && data.messages.length > 0) {
+          response = await fetch('/api/interview/message', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ interviewId: interview.id }),
+          });
+          data = await response.json();
+        }
+        if (data.messages) {
+          setMessages(data.messages);
+        }
       }
+      // Put the last user message back in the input for editing
+      if (lastUserMsg) {
+        setInput(lastUserMsg.content);
+      }
+      setCanUndo(false);
     } catch (error) {
       console.error('Failed to undo:', error);
     } finally {
@@ -884,7 +903,7 @@ export default function InterviewPage() {
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                   </svg>
-                  <span>{undoing ? '...' : 'Undo'}</span>
+                  <span>{undoing ? '...' : 'Edit last'}</span>
                 </button>
               )}
               <button
