@@ -49,7 +49,7 @@ export default function InterviewPage() {
   const [initializing, setInitializing] = useState(true);
   const [extracting, setExtracting] = useState(false);
   const [undoing, setUndoing] = useState(false);
-  const [canUndo, setCanUndo] = useState(true);
+  const [canUndo, setCanUndo] = useState(false);
   const [pastInterviews, setPastInterviews] = useState<PastInterview[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [isListening, setIsListening] = useState(false);
