@@ -9,20 +9,20 @@ export interface ThemeConfig {
 }
 
 const DEFAULT_THEME: ThemeConfig = {
-  primaryColor: '#A99AD4', // warm soft purple
+  primaryColor: '#7C9FF5', // light blue
   fontFamily: 'system',
   darkMode: false,
 };
 
 const THEME_COLORS = [
-  { id: 'mauve', color: '#A99AD4', label: 'Soft Purple' },
-  { id: 'dusty-rose', color: '#D4939F', label: 'Dusty Rose' },
-  { id: 'terracotta', color: '#D49578', label: 'Terracotta' },
-  { id: 'warm-sand', color: '#CCB389', label: 'Warm Sand' },
-  { id: 'sage', color: '#A8BDA3', label: 'Sage' },
-  { id: 'plum', color: '#B385A7', label: 'Plum' },
-  { id: 'clay', color: '#BF9687', label: 'Clay' },
-  { id: 'storm', color: '#95A0AB', label: 'Storm' },
+  { id: 'sky', color: '#7C9FF5', label: 'Sky Blue' },
+  { id: 'lavender', color: '#C4B5E3', label: 'Lavender' },
+  { id: 'coral', color: '#F0897A', label: 'Coral' },
+  { id: 'peach', color: '#F5A976', label: 'Peach' },
+  { id: 'mint', color: '#6DCBA3', label: 'Mint' },
+  { id: 'rose', color: '#F28CAD', label: 'Rose Pink' },
+  { id: 'sunshine', color: '#F5C344', label: 'Sunshine' },
+  { id: 'ocean', color: '#5BB8D4', label: 'Ocean' },
 ];
 
 const FONT_FAMILIES = [
@@ -47,8 +47,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Clear old theme key from previous version
+    localStorage.removeItem('lifestory-theme');
     // Load theme from localStorage on mount
-    const stored = localStorage.getItem('lifestory-theme');
+    const stored = localStorage.getItem('lifestory-theme-v2');
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
@@ -64,7 +66,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (!mounted) return;
 
     // Save to localStorage
-    localStorage.setItem('lifestory-theme', JSON.stringify(theme));
+    localStorage.setItem('lifestory-theme-v2', JSON.stringify(theme));
 
     // Apply CSS variables
     const root = document.documentElement;
@@ -94,7 +96,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   function resetTheme() {
     setThemeState(DEFAULT_THEME);
-    localStorage.removeItem('lifestory-theme');
+    localStorage.removeItem('lifestory-theme-v2');
   }
 
   return (

@@ -53,16 +53,16 @@ export default function ContinueConversationButton() {
   return (
     <Link
       href={href}
-      className="block w-full bg-primary hover:bg-primary-dark text-white rounded-2xl p-5 transition group"
+      className="block w-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-dark)] hover:brightness-105 text-white rounded-2xl p-5 transition group shadow-sm"
     >
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
+        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
           <ChatIcon />
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-semibold">Continue Conversation</h3>
           {lastActive ? (
-            <p className="text-white/70 text-sm truncate">{lastActive.preview || 'Resume your last conversation'}</p>
+            <p className="text-white/70 text-sm line-clamp-2">{lastActive.preview || 'Resume your last conversation'}</p>
           ) : loading ? (
             <p className="text-white/50 text-sm">Loading...</p>
           ) : (
