@@ -628,25 +628,33 @@ export default function InterviewPage() {
           {/* Continue Landing Page */}
           {showLanding && showContinue && (
             <div className="flex flex-col items-start justify-center py-12 sm:py-20 max-w-md mx-auto">
-              {/* Greeting - no logo */}
+              {/* Greeting */}
               <p className="text-lg font-medium text-slate-600 mb-2">
                 Hi {session?.user?.name || 'there'}
               </p>
 
-              {/* Subtitle - same font, bigger size */}
-              <p className="text-2xl font-medium text-slate-600 mb-3">
-                Let&apos;s continue last chat
+              {/* Continue our last chat — gradient colored */}
+              <p
+                className="text-2xl font-bold mb-3"
+                style={{
+                  background: 'linear-gradient(90deg, #f472b6, #fb923c, #fbbf24, #34d399, #60a5fa, #a78bfa)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                Continue our last chat:
               </p>
 
-              {/* Last chat title in primary color */}
+              {/* Last chat title */}
               {lastChatTitle && (
-                <p className="text-lg font-semibold text-primary mb-8">
+                <p className="text-lg font-semibold text-primary mb-6">
                   {lastChatTitle}
                 </p>
               )}
-              {!lastChatTitle && <div className="mb-8" />}
+              {!lastChatTitle && <div className="mb-6" />}
 
-              {/* Continue last chat button */}
+              {/* Continue button */}
               <button
                 onClick={handleContinueChat}
                 className="px-10 py-4 bg-primary hover:bg-primary-dark text-white rounded-xl transition font-semibold text-lg mb-6 shadow-sm"
@@ -655,47 +663,28 @@ export default function InterviewPage() {
               </button>
 
               {/* "or" divider */}
-              <p className="text-sm text-slate-400 mb-6">or</p>
+              <p className="text-sm text-slate-400 mb-4">or</p>
 
-              {/* Quick Actions */}
-              <div className="flex flex-col items-start gap-3">
-                <Link
-                  href="/upload"
-                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 transition"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Upload a Story
-                </Link>
-                <Link
-                  href="/upload"
-                  className="flex items-center gap-2 text-sm text-amber-600 hover:text-amber-700 transition"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  Upload Photos
-                </Link>
-                <Link
-                  href="/share"
-                  className="flex items-center gap-2 text-sm text-emerald-600 hover:text-emerald-700 transition"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Download Your Story
-                </Link>
-                <Link
-                  href="/share"
-                  className="flex items-center gap-2 text-sm text-purple-600 hover:text-purple-700 transition"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                  </svg>
-                  Share Memories
-                </Link>
-              </div>
+              {/* Share a new memory — gradient colored */}
+              <p
+                className="text-2xl font-bold mb-4"
+                style={{
+                  background: 'linear-gradient(90deg, #f472b6, #fb923c, #fbbf24, #34d399, #60a5fa, #a78bfa)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                Share a new memory
+              </p>
+
+              {/* Start new chat button */}
+              <button
+                onClick={handleStartNewChat}
+                className="px-10 py-4 bg-primary hover:bg-primary-dark text-white rounded-xl transition font-semibold text-lg shadow-sm"
+              >
+                Start new chat
+              </button>
             </div>
           )}
 
