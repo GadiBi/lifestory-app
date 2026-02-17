@@ -29,32 +29,59 @@ export default function Header({ onToggleSidebar, chatTitle, sidebarExpanded, is
   const userName = session?.user?.name || 'User';
   const initials = userName.charAt(0).toUpperCase();
 
-  // Desktop: header starts after sidebar (sidebar is on top of header area)
-  // Sidebar is always z-50, header is z-40. Sidebar covers the left portion.
+  // Desktop: header starts after sidebar. Sidebar is z-50, header z-40.
   const headerPaddingLeft = isMobile ? undefined : sidebarExpanded ? '288px' : '56px';
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 h-14 bg-white z-40 flex items-center px-3 transition-all duration-200"
+      className="fixed top-0 left-0 right-0 h-14 bg-white z-40 flex items-center px-4 md:px-6 transition-all duration-200"
       style={{ paddingLeft: headerPaddingLeft }}
     >
-      {/* Brand - "My Story" shifts when sidebar opens */}
-      <div className="flex-1 flex items-center min-w-0">
-        {/* Desktop: brand always visible */}
-        <Link href="/interview" className="hidden md:flex items-center gap-2 shrink-0">
-          <span className="font-bold text-lg text-primary">My Story</span>
-        </Link>
+      {/* Mobile: hamburger icon to open sidebar */}
+      {isMobile && (
+        <button
+          onClick={onToggleSidebar}
+          className="p-2 rounded-lg hover:bg-slate-100 transition text-slate-600 mr-1"
+          aria-label="Toggle sidebar"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      )}
 
-        {/* Mobile: centered brand or chat title */}
-        <div className="md:hidden flex-1 text-center">
+      {/* Left: Brand (desktop only) */}
+      <div className="hidden md:flex items-center shrink-0 ml-2">
+        <Link href="/interview" className="flex items-center gap-2">
+          <span
+            className="font-bold text-lg"
+            style={{
+              background: 'linear-gradient(90deg, #f472b6, #fb923c, #fbbf24, #34d399, #60a5fa, #a78bfa)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >My Story</span>
+        </Link>
+      </div>
+
+      {/* Center: chat title (desktop) or brand/chat title (mobile) */}
+      <div className="flex-1 text-center min-w-0">
+        {isMobile ? (
           <span className="font-semibold text-base text-primary truncate">
             {chatTitle || 'My Story'}
           </span>
-        </div>
+        ) : (
+          chatTitle && (
+            <span className="text-sm text-slate-500 font-medium truncate">
+              {chatTitle}
+            </span>
+          )
+        )}
       </div>
 
-      {/* Right: User icon */}
-      <div className="relative mr-2" ref={menuRef}>
+      {/* Right: User icon - moved a bit inward */}
+      <div className="relative mr-3 md:mr-4" ref={menuRef}>
         <button
           onClick={() => setUserMenuOpen(!userMenuOpen)}
           className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-medium hover:opacity-90 transition"

@@ -51,12 +51,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         className="pt-14 transition-all duration-200"
         style={{ paddingLeft: desktopPaddingLeft }}
       >
-        {/* Desktop: Sticky live feed title bar below header */}
-        {chatTitle && !isMobile && (
-          <div className="sticky top-14 z-30 bg-slate-50 px-4 py-1.5">
-            <p className="text-sm text-slate-500 font-medium text-center truncate">{chatTitle}</p>
-          </div>
-        )}
         {children}
       </div>
     </>

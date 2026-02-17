@@ -339,7 +339,8 @@ export async function getOpeningMessage(context: ConversationContext): Promise<{
   ];
 
   const approaches = context.allLifeEvents.length > 0 ? returningApproaches : firstTimeApproaches;
-  const userPrompt = approaches[Math.floor(Math.random() * approaches.length)];
+  const userPrompt = approaches[Math.floor(Math.random() * approaches.length)] +
+    '\n\nCRITICAL: You must NEVER repeat an opening you have used before with this user. Every greeting must be unique — different words, different angle, different question. Be wildly creative and varied each time.';
 
   const response = await anthropic.messages.create({
     model,
