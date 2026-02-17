@@ -708,7 +708,15 @@ export default function InterviewPage() {
               </p>
 
               {/* Prompt */}
-              <p className="text-2xl font-medium text-slate-600 mb-8">
+              <p
+                className="text-2xl font-bold mb-8"
+                style={{
+                  background: 'linear-gradient(90deg, #f472b6, #fb923c, #fbbf24, #34d399, #60a5fa, #a78bfa)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
                 {NEW_CHAT_PROMPT}
               </p>
 
