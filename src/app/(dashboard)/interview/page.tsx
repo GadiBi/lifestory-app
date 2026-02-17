@@ -172,24 +172,38 @@ export default function InterviewPage() {
     }
   }, []);
 
+  // Track which searchParams we already processed to prevent re-fire after router.replace
+  const processedParamsRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
       router.push('/login');
       return;
     }
+
+    const paramsKey = searchParams.toString();
+
+    // If we already processed these exact params (or the cleared version after replace), skip
+    if (processedParamsRef.current === paramsKey) return;
+    // If we just processed params and now they're empty (from router.replace), skip
+    if (processedParamsRef.current && processedParamsRef.current !== '' && paramsKey === '') {
+      processedParamsRef.current = paramsKey;
+      return;
+    }
+    processedParamsRef.current = paramsKey;
+
     const startNew = searchParams.get('new') === 'true';
     const resumeId = searchParams.get('id');
 
     if (startNew) {
-      router.replace('/interview');
       // Show the new chat landing page, don't auto-start
       setMessages([]);
+      setInterview(null);
       setShowContinue(false);
       setShowNewChat(true);
       setInitializing(false);
     } else if (resumeId) {
-      router.replace('/interview');
       loadInterview(resumeId);
       setInitializing(false);
     } else {
@@ -564,9 +578,12 @@ export default function InterviewPage() {
   async function startNewInterview() {
     // Show new chat landing page instead of immediately starting
     setMessages([]);
+    setInterview(null);
     setShowContinue(false);
     setShowNewChat(true);
     setInitializing(false);
+    // Reset so sidebar navigation works again
+    processedParamsRef.current = null;
   }
 
   // Detect Hebrew text for RTL

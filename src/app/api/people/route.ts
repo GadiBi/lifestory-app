@@ -23,8 +23,9 @@ const relationshipPatterns: [RegExp, string][] = [
   [/\b(neighbor|neighbour)\b/i, 'Neighbor'],
 ];
 
-// Common words to exclude from proper noun detection
+// Common words to exclude from proper noun detection — be very aggressive to avoid false positives
 const excludeWords = new Set([
+  // Pronouns & articles
   'The', 'And', 'But', 'For', 'Not', 'You', 'She', 'His', 'Her', 'Was', 'Are',
   'They', 'This', 'That', 'Would', 'Could', 'Should', 'Have', 'Been', 'When',
   'What', 'How', 'Who', 'Why', 'Where', 'Yes', 'Yeah', 'Well', 'Also', 'Then',
@@ -33,11 +34,45 @@ const excludeWords = new Set([
   'Many', 'Much', 'Most', 'Other', 'Each', 'Every', 'Both', 'Few', 'More',
   'Into', 'Over', 'Such', 'Still', 'Back', 'Even', 'Made', 'Never', 'Always',
   'Sometimes', 'Often', 'Once', 'Twice', 'Today', 'Yesterday', 'Tomorrow',
+  // Days & months
   'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
   'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
-  'September', 'October', 'November', 'December', 'Mom', 'Dad', 'Mother',
-  'Father', 'Brother', 'Sister', 'Grandma', 'Grandpa', 'Wife', 'Husband',
+  'September', 'October', 'November', 'December',
+  // Family/relationship words (already detected by patterns)
+  'Mom', 'Dad', 'Mother', 'Father', 'Brother', 'Sister', 'Grandma', 'Grandpa',
+  'Wife', 'Husband', 'Son', 'Daughter', 'Uncle', 'Aunt', 'Cousin', 'Family',
+  'Friend', 'Teacher', 'Mentor', 'Boss', 'Neighbor', 'Colleague',
+  // Common nouns that start sentences
+  'People', 'Chat', 'Story', 'Life', 'Time', 'Years', 'Place', 'Home', 'School',
+  'Work', 'World', 'Children', 'Things', 'Something', 'Everything', 'Nothing',
+  'Everyone', 'Someone', 'Anyone', 'Nobody', 'Memories', 'Memory', 'Moment',
+  'Moments', 'Part', 'Way', 'Day', 'Days', 'Night', 'Nights', 'Morning',
+  'Year', 'Month', 'Week', 'First', 'Last', 'Next', 'New', 'Old', 'Good',
+  'Best', 'Great', 'Little', 'Big', 'Long', 'Small', 'Young', 'Early',
+  // App/UI words
+  'Continue', 'Start', 'Begin', 'Share', 'Upload', 'Download', 'Save',
+  'Edit', 'Delete', 'Add', 'Open', 'Close', 'Send', 'Write', 'Read',
+  // Common verbs/words at start of sentences
+  'Think', 'Know', 'Remember', 'Told', 'Said', 'Asked', 'Went', 'Came',
+  'Took', 'Gave', 'Left', 'Right', 'Found', 'Lost', 'Felt', 'Loved',
+  'Wanted', 'Needed', 'Started', 'Moved', 'Lived', 'Worked', 'Played',
+  'Called', 'Named', 'Born', 'Grew', 'Became', 'Died', 'Married',
+  // Places & directions
+  'North', 'South', 'East', 'West', 'Street', 'Road', 'City', 'Town',
+  'Country', 'State', 'Israel', 'America', 'Europe', 'House', 'Building',
+  // Other common capitalized words
+  'God', 'Lord', 'Army', 'War', 'Peace', 'King', 'Queen', 'Church',
+  'Temple', 'High', 'Middle', 'College', 'University', 'Hospital',
+  'Summer', 'Winter', 'Spring', 'Fall', 'Autumn', 'Christmas', 'Easter',
+  'Passover', 'Thank', 'Sorry', 'Please', 'Hello', 'Welcome',
 ]);
+
+// Only accept a proper noun as a person name if it appears near a person-context word
+const personContextPatterns = [
+  /\b(named|called|met|knew|married|loved|friend|with|and)\s+[A-Z]/i,
+  /\b[A-Z][a-z]+\s+(said|told|asked|came|went|was|is|had|loved|married)/i,
+  /\bmy\s+(friend|brother|sister|mother|father|uncle|aunt|cousin|neighbor)\s+[A-Z]/i,
+];
 
 interface PersonInfo {
   name: string;
@@ -112,6 +147,52 @@ export async function GET() {
       }
     }
 
+    // Track how many times each proper noun appears across all texts
+    const nounFrequency = new Map<string, number>();
+
+    function countNoun(noun: string) {
+      const key = noun.toLowerCase();
+      nounFrequency.set(key, (nounFrequency.get(key) || 0) + 1);
+    }
+
+    function isLikelyPersonName(noun: string, surroundingText: string): boolean {
+      if (excludeWords.has(noun)) return false;
+      // Must be 3+ chars
+      if (noun.length < 3) return false;
+      // Check if it appears near person-context words
+      for (const pattern of personContextPatterns) {
+        if (pattern.test(surroundingText)) {
+          // Check if this noun is part of the match
+          if (surroundingText.includes(noun)) return true;
+        }
+      }
+      // Accept if mentioned 3+ times (likely a real name)
+      const freq = nounFrequency.get(noun.toLowerCase()) || 0;
+      if (freq >= 3) return true;
+      return false;
+    }
+
+    // First pass: count all proper noun frequencies
+    const allTexts: string[] = [];
+    for (const event of events) {
+      const text = `${event.title} ${event.description}`;
+      allTexts.push(text);
+      const nouns = text.match(/\b[A-Z][a-z]{2,}\b/g) || [];
+      for (const noun of nouns) countNoun(noun);
+    }
+    for (const interview of interviews) {
+      try {
+        const messages = JSON.parse(interview.conversationLog || '[]') as { role: string; content: string }[];
+        const userMessages = messages.filter(m => m.role === 'user').map(m => m.content);
+        const fullText = userMessages.join(' ');
+        allTexts.push(fullText);
+        const nouns = fullText.match(/\b[A-Z][a-z]{2,}\b/g) || [];
+        for (const noun of nouns) countNoun(noun);
+      } catch {
+        // skip
+      }
+    }
+
     // Scan life events
     for (const event of events) {
       const text = `${event.title} ${event.description}`;
@@ -123,10 +204,10 @@ export async function GET() {
         }
       }
 
-      // Extract proper nouns as potential names
+      // Extract proper nouns — only if they look like real person names
       const properNouns = text.match(/\b[A-Z][a-z]{2,}\b/g) || [];
       for (const noun of properNouns) {
-        if (!excludeWords.has(noun)) {
+        if (isLikelyPersonName(noun, text)) {
           addPerson(noun, 'Person', { type: 'event', id: event.id, title: event.title });
         }
       }
@@ -138,8 +219,6 @@ export async function GET() {
         const messages = JSON.parse(interview.conversationLog || '[]') as { role: string; content: string }[];
         const userMessages = messages.filter(m => m.role === 'user').map(m => m.content);
         const fullText = userMessages.join(' ');
-
-        // Generate a title for this conversation
         const convTitle = interview.currentPeriod || `Conversation`;
 
         // Check relationship patterns
@@ -149,10 +228,10 @@ export async function GET() {
           }
         }
 
-        // Extract proper nouns
+        // Extract proper nouns — only if they look like real person names
         const properNouns = fullText.match(/\b[A-Z][a-z]{2,}\b/g) || [];
         for (const noun of properNouns) {
-          if (!excludeWords.has(noun)) {
+          if (isLikelyPersonName(noun, fullText)) {
             addPerson(noun, 'Person', { type: 'conversation', id: interview.id, title: convTitle });
           }
         }

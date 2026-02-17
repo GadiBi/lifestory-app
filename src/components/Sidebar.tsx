@@ -327,7 +327,7 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle, chatTit
             }`}
           >
             {item.icon}
-            <span className="text-sm">{item.label}</span>
+            <span className={`text-sm ${item.id === 'interview' || item.id === 'new' ? 'font-bold' : ''}`}>{item.label}</span>
           </button>
         ))}
 
