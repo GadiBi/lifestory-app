@@ -324,18 +324,28 @@ export async function getOpeningMessage(context: ConversationContext): Promise<{
 
   // Pick a random approach to keep openings fresh and never repetitive
   const returningApproaches = [
-    `The user is returning for another session. Reference something specific from their past conversations and ask a follow-up question you've been genuinely curious about. Be warm but not performative.`,
-    `The user is back. Pick a detail from a previous conversation — a person they mentioned, a place, a feeling — and ask about it from a new angle. Keep it natural, like you actually remembered.`,
-    `Welcome the user back briefly. Instead of asking about the past, suggest exploring a new topic or time period you haven't covered yet. Be specific in your suggestion based on what's missing from their story.`,
-    `The user returns. Start by sharing a brief observation or reflection about something they told you before — something that stuck with you. Then ask one question that goes deeper.`,
-    `Greet the user casually. Pick one of their life events and ask about the sensory details — what they saw, heard, smelled. Make it feel like picking up a conversation mid-thought.`,
+    `The user is returning. Reference something specific from their past conversations and ask a follow-up question you've been genuinely curious about. DO NOT start with "Hi" or "Welcome back" — jump straight in as if you were just thinking about them.`,
+    `The user is back. Pick a detail from a previous conversation — a person they mentioned, a place, a feeling — and ask about it from a new angle. Start mid-thought, no greetings.`,
+    `Instead of asking about the past, suggest exploring a new topic or time period you haven't covered yet. Be specific in your suggestion. Skip all greeting words entirely.`,
+    `Start by sharing a brief observation about a pattern you noticed in their stories — something that connects two different memories they shared. Then ask one question. No "hello" or "welcome".`,
+    `Pick one of their life events and ask about the sensory details — what they saw, heard, smelled. Jump straight into the question as if picking up mid-conversation.`,
+    `You've been thinking about something they mentioned before — a contradiction, an unanswered question, a loose thread. Pull on it. Start with "I've been thinking about..." or "Something you said keeps coming back to me..."`,
+    `Ask about the person who appears most often in their stories. What would that person say if they could hear these memories? Start directly with the question.`,
+    `Think about what's missing from their story so far — a time period, a relationship, an emotion. Gently point to that gap and invite them to explore it. No greetings.`,
+    `Pick the most emotionally charged moment from their past stories. Ask about what happened next — the aftermath, the ripple effects. Start with genuine curiosity.`,
+    `Connect two seemingly unrelated stories they've told before and ask if they see a thread between them. Share your own observation first, then ask. Skip pleasantries.`,
   ];
   const firstTimeApproaches = [
-    `This is your first conversation with ${context.userName}. Ask about a specific childhood memory — a smell, a sound, a place they loved. Make it vivid and inviting.`,
-    `You're meeting ${context.userName} for the first time. Ask about a person who shaped them — not "who influenced you" but something specific like "who taught you something without meaning to?"`,
-    `First time talking with ${context.userName}. Ask about a place that felt like home — maybe not their actual home. Be curious and specific.`,
-    `You're just getting to know ${context.userName}. Ask about a moment they're proud of that nobody else knows about. Keep it light and genuine.`,
-    `This is your first chat with ${context.userName}. Ask about a turning point — a day or moment when something shifted. Don't be dramatic about it, just curious.`,
+    `This is your first conversation with ${context.userName}. Ask about a specific childhood memory — a smell, a sound, a place they loved. Make it vivid and inviting. DO NOT start with "Hi" or any greeting word.`,
+    `You're meeting ${context.userName} for the first time. Ask about a person who shaped them — not "who influenced you" but something specific like "who taught you something without meaning to?" Start with a thought-provoking observation, NOT a greeting.`,
+    `First time talking with ${context.userName}. Ask about a place that felt like home — maybe not their actual home. Be curious and specific. Open with an interesting thought, NOT "Hello" or "Welcome".`,
+    `You're just getting to know ${context.userName}. Ask about a moment they're proud of that nobody else knows about. Keep it light and genuine. Start mid-thought, as if continuing a conversation.`,
+    `This is your first chat with ${context.userName}. Ask about a turning point — a day or moment when something shifted. Don't be dramatic about it, just curious. Jump straight into the question.`,
+    `Meeting ${context.userName} for the first time. Ask about a photograph they'd save if the house was on fire — and what's the story behind it? Be warm but skip all greetings.`,
+    `First chat with ${context.userName}. Ask about a sound from their childhood that would instantly transport them back. Maybe a song, a voice, a door creaking. Start with curiosity, no pleasantries.`,
+    `Getting to know ${context.userName}. Ask about a meal that meant more than food — a dinner table memory, a recipe passed down, or a meal that changed something. Start with the question directly.`,
+    `This is your first session with ${context.userName}. Ask about something small that they inherited from someone — a habit, a phrase, a way of doing things. Be specific and intimate. No greeting words.`,
+    `You're just starting with ${context.userName}. Ask about a moment when they felt completely free — maybe as a kid, maybe yesterday. What did that feel like in their body? Start with genuine wonder.`,
   ];
 
   const approaches = context.allLifeEvents.length > 0 ? returningApproaches : firstTimeApproaches;
@@ -345,7 +355,7 @@ export async function getOpeningMessage(context: ConversationContext): Promise<{
   const response = await anthropic.messages.create({
     model,
     max_tokens: 512,
-    temperature: 0.9,
+    temperature: 1.0,
     system: systemPrompt,
     messages: [
       {

@@ -45,7 +45,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 90 * 24 * 60 * 60, // 90 days - keep users logged in
   },
   pages: {
     signIn: '/login',
@@ -54,10 +54,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        // If not "remember me", set short expiry (session closes with browser)
-        if (!(user as Record<string, unknown>).rememberMe) {
-          token.maxAge = 0; // Session cookie (no max-age = browser session)
-        }
       }
       return token;
     },

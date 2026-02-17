@@ -42,6 +42,7 @@ export default function InterviewPage() {
   const [showContinue, setShowContinue] = useState(false);
   const [showNewChat, setShowNewChat] = useState(false);
   const [liveFeedTitle, setLiveFeedTitle] = useState<string | null>(null);
+  const [lastChatTitle, setLastChatTitle] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   // Audio recording state
@@ -192,12 +193,8 @@ export default function InterviewPage() {
       loadInterview(resumeId);
       setInitializing(false);
     } else {
-      const hasSeenContinue = sessionStorage.getItem('hasSeenContinue');
-      if (hasSeenContinue) {
-        initializeInterview(true);
-      } else {
-        initializeInterview(false);
-      }
+      // Always show the landing page (continue or new chat)
+      initializeInterview(false);
     }
   }, [session, status, router, searchParams]);
 
@@ -253,7 +250,9 @@ export default function InterviewPage() {
             await getOpeningMessage(data.interview.id);
           }
         } else if (hasUserMessages) {
-          // Show continue screen only if there are actual user messages
+          // Show continue screen — compute the title from messages
+          const title = generateChatTitle(data.messages);
+          setLastChatTitle(title !== 'New Chat' ? title : null);
           setShowContinue(true);
         } else {
           // No user messages - show new chat landing
@@ -573,13 +572,30 @@ export default function InterviewPage() {
   // Detect Hebrew text for RTL
   const isHebrew = (text: string) => /[\u0590-\u05FF]/.test(text);
 
-  if (status === 'loading' || initializing) {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="flex items-center gap-3">
           <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           <span className="text-slate-500">Loading...</span>
         </div>
+      </div>
+    );
+  }
+
+  // Show a subtle loading state while initializing (no full-page jump)
+  if (initializing) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-3xl mx-auto px-4 py-6">
+            <div className="flex flex-col items-start justify-center py-12 sm:py-20 max-w-md mx-auto">
+              <div className="h-6 w-32 bg-slate-100 rounded animate-pulse mb-3" />
+              <div className="h-8 w-64 bg-slate-100 rounded animate-pulse mb-10" />
+              <div className="h-12 w-48 bg-slate-100 rounded-xl animate-pulse" />
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
@@ -606,21 +622,19 @@ export default function InterviewPage() {
               </p>
 
               {/* Last chat title in primary color */}
-              {liveFeedTitle && liveFeedTitle !== 'New Chat' && (
+              {lastChatTitle && (
                 <p className="text-lg font-semibold text-primary mb-8">
-                  {liveFeedTitle}
+                  {lastChatTitle}
                 </p>
               )}
-              {(!liveFeedTitle || liveFeedTitle === 'New Chat') && (
-                <div className="mb-8" />
-              )}
+              {!lastChatTitle && <div className="mb-8" />}
 
-              {/* Continue Chat button */}
+              {/* Continue last chat button */}
               <button
                 onClick={handleContinueChat}
                 className="px-10 py-4 bg-primary hover:bg-primary-dark text-white rounded-xl transition font-semibold text-lg mb-6 shadow-sm"
               >
-                Continue Chat
+                Continue last chat
               </button>
 
               {/* "or" divider */}

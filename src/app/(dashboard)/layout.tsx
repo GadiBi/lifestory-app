@@ -45,7 +45,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         sidebarExpanded={sidebarExpanded}
         isMobile={isMobile}
       />
-      <Sidebar expanded={sidebarExpanded} isMobile={isMobile} onClose={closeSidebar} onToggle={toggleSidebar} />
+      <Sidebar expanded={sidebarExpanded} isMobile={isMobile} onClose={closeSidebar} onToggle={toggleSidebar} chatTitle={chatTitle} />
 
       <div
         className="pt-14 transition-all duration-200"

@@ -56,7 +56,7 @@ const NAV_ITEMS = [
   },
   {
     id: 'people',
-    label: 'My People',
+    label: 'People in My Life',
     href: '/people',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,9 +71,10 @@ interface SidebarProps {
   isMobile: boolean;
   onClose: () => void;
   onToggle: () => void;
+  chatTitle?: string | null;
 }
 
-export default function Sidebar({ expanded, isMobile, onClose, onToggle }: SidebarProps) {
+export default function Sidebar({ expanded, isMobile, onClose, onToggle, chatTitle }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [chatsExpanded, setChatsExpanded] = useState(false);
@@ -108,8 +109,14 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle }: Sideb
   }
 
   function isActive(item: typeof NAV_ITEMS[0]) {
-    if (item.id === 'interview') return pathname === '/interview';
-    if (item.id === 'new') return false;
+    if (item.id === 'interview') {
+      // Continue Chat is active when on /interview AND chat has a real title (not New Chat)
+      return pathname === '/interview' && !!chatTitle && chatTitle !== 'New Chat';
+    }
+    if (item.id === 'new') {
+      // New Chat is active when on /interview AND title is New Chat or null
+      return pathname === '/interview' && (!chatTitle || chatTitle === 'New Chat');
+    }
     return pathname === item.href;
   }
 
@@ -164,7 +171,7 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle }: Sideb
                 }`}
               >
                 {item.icon}
-                <span className="text-sm">{item.label}</span>
+                <span className={`text-sm ${item.id === 'interview' || item.id === 'new' ? 'font-bold' : ''}`}>{item.label}</span>
               </button>
             ))}
 

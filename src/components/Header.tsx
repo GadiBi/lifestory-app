@@ -65,18 +65,27 @@ export default function Header({ onToggleSidebar, chatTitle, sidebarExpanded, is
         </Link>
       </div>
 
-      {/* Center: chat title (desktop) or brand/chat title (mobile) */}
+      {/* Mobile: Gradient logo */}
+      {isMobile && (
+        <Link href="/interview" className="flex items-center shrink-0 ml-1">
+          <span
+            className="font-bold text-lg"
+            style={{
+              background: 'linear-gradient(90deg, #f472b6, #fb923c, #fbbf24, #34d399, #60a5fa, #a78bfa)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >My Story</span>
+        </Link>
+      )}
+
+      {/* Center: chat title */}
       <div className="flex-1 text-center min-w-0">
-        {isMobile ? (
-          <span className="font-semibold text-base text-primary truncate">
-            {chatTitle || 'My Story'}
+        {chatTitle && chatTitle !== 'New Chat' && (
+          <span className="text-sm text-slate-500 font-medium truncate">
+            {chatTitle}
           </span>
-        ) : (
-          chatTitle && (
-            <span className="text-sm text-slate-500 font-medium truncate">
-              {chatTitle}
-            </span>
-          )
         )}
       </div>
 

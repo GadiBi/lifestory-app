@@ -52,8 +52,8 @@ export default function TimelinePage() {
   const router = useRouter();
   const [events, setEvents] = useState<LifeEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterPeriod, setFilterPeriod] = useState('');
-  const [filterCategory, setFilterCategory] = useState('');
+  const filterPeriod = '';
+  const filterCategory = '';
   const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('timeline');
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string | null } | null>(null);
@@ -211,22 +211,6 @@ export default function TimelinePage() {
                 </button>
               </div>
 
-              <select
-                value={filterPeriod}
-                onChange={(e) => setFilterPeriod(e.target.value)}
-                className="px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-              >
-                <option value="">All Periods</option>
-                {PERIODS.map(p => <option key={p.id} value={p.id}>{p.label}</option>)}
-              </select>
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                className="px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-              >
-                <option value="">All Categories</option>
-                {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.icon} {c.label}</option>)}
-              </select>
             </div>
           </div>
         </div>
