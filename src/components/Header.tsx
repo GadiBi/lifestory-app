@@ -51,7 +51,7 @@ export default function Header({ onToggleSidebar, chatTitle, sidebarExpanded, is
       )}
 
       {/* Left: Brand (desktop only) */}
-      <div className="hidden md:flex items-center shrink-0 ml-2">
+      <div className="hidden md:flex items-center shrink-0 ml-6">
         <Link href="/interview" className="flex items-center gap-2">
           <span
             className="font-bold text-lg"
