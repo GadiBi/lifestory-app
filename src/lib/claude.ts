@@ -322,15 +322,29 @@ export async function getOpeningMessage(context: ConversationContext): Promise<{
   const model = 'claude-sonnet-4-20250514';
   const systemPrompt = buildSystemPrompt(context);
 
-  // If user has previous events, acknowledge their return
-  const userPrompt = context.allLifeEvents.length > 0
-    ? `The user is returning for another session. Greet them like a real person would - no performance, no "so good to see you." Just be genuine. Reference something specific from their past conversations that stayed with you, and ask one real question that shows you've been thinking about their story.`
-    : `This is your first conversation with ${context.userName}. Greet them simply and genuinely - like a wise friend sitting down for coffee, not a host on a talk show. Be curious about who they are. Ask one grounded, specific question to get started - something that invites a real memory, not a generic "tell me about yourself."`;
+  // Pick a random approach to keep openings fresh and never repetitive
+  const returningApproaches = [
+    `The user is returning for another session. Reference something specific from their past conversations and ask a follow-up question you've been genuinely curious about. Be warm but not performative.`,
+    `The user is back. Pick a detail from a previous conversation — a person they mentioned, a place, a feeling — and ask about it from a new angle. Keep it natural, like you actually remembered.`,
+    `Welcome the user back briefly. Instead of asking about the past, suggest exploring a new topic or time period you haven't covered yet. Be specific in your suggestion based on what's missing from their story.`,
+    `The user returns. Start by sharing a brief observation or reflection about something they told you before — something that stuck with you. Then ask one question that goes deeper.`,
+    `Greet the user casually. Pick one of their life events and ask about the sensory details — what they saw, heard, smelled. Make it feel like picking up a conversation mid-thought.`,
+  ];
+  const firstTimeApproaches = [
+    `This is your first conversation with ${context.userName}. Ask about a specific childhood memory — a smell, a sound, a place they loved. Make it vivid and inviting.`,
+    `You're meeting ${context.userName} for the first time. Ask about a person who shaped them — not "who influenced you" but something specific like "who taught you something without meaning to?"`,
+    `First time talking with ${context.userName}. Ask about a place that felt like home — maybe not their actual home. Be curious and specific.`,
+    `You're just getting to know ${context.userName}. Ask about a moment they're proud of that nobody else knows about. Keep it light and genuine.`,
+    `This is your first chat with ${context.userName}. Ask about a turning point — a day or moment when something shifted. Don't be dramatic about it, just curious.`,
+  ];
 
+  const approaches = context.allLifeEvents.length > 0 ? returningApproaches : firstTimeApproaches;
+  const userPrompt = approaches[Math.floor(Math.random() * approaches.length)];
 
   const response = await anthropic.messages.create({
     model,
     max_tokens: 512,
+    temperature: 0.9,
     system: systemPrompt,
     messages: [
       {

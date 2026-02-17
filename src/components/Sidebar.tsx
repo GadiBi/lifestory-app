@@ -120,16 +120,29 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle }: Sideb
   if (isMobile && expanded) {
     return (
       <>
-        {/* Backdrop - closes on tap */}
+        {/* Backdrop */}
         <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
 
-        {/* Drawer */}
-        <div className="fixed inset-y-0 left-0 w-72 bg-slate-50 z-50 shadow-xl flex flex-col animate-slide-in pt-14">
+        {/* Drawer - full height, on top of everything */}
+        <div className="fixed inset-y-0 left-0 w-72 bg-slate-50 z-50 shadow-xl flex flex-col animate-slide-in">
+          {/* Top: bow icon */}
+          <div className="h-14 flex items-center px-2 shrink-0">
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg hover:bg-slate-200 transition text-slate-600"
+              aria-label="Close sidebar"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+
           {/* Search bar */}
-          <div className="px-3 pt-3 pb-1">
+          <div className="px-3 pb-1">
             <button
               onClick={() => navigate('/search')}
-              className="w-full flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-400 hover:border-slate-300 hover:text-slate-500 transition text-sm"
+              className="w-full flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:border-slate-300 hover:text-slate-500 transition text-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -147,7 +160,7 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle }: Sideb
                 className={`w-full flex items-center gap-3 px-4 py-3 transition ${
                   isActive(item)
                     ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-slate-700 hover:bg-slate-50'
+                    : 'text-slate-700 hover:bg-slate-100'
                 }`}
               >
                 {item.icon}
@@ -172,11 +185,24 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle }: Sideb
     );
   }
 
-  // Desktop collapsed: narrow icon rail
+  // Desktop collapsed: narrow icon rail — full height from top to bottom, ON TOP of header
   if (!expanded) {
     return (
-      <div className="hidden md:flex fixed left-0 top-14 bottom-0 w-14 bg-slate-50 z-30 flex-col items-center py-2">
-        <nav className="flex-1 flex flex-col items-center gap-1">
+      <div className="hidden md:flex fixed left-0 top-0 bottom-0 w-14 bg-slate-50 z-50 flex-col items-center">
+        {/* Bow icon at very top, same height as header */}
+        <div className="h-14 flex items-center justify-center shrink-0">
+          <button
+            onClick={onToggle}
+            className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-200 transition"
+            aria-label="Toggle sidebar"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+
+        <nav className="flex-1 flex flex-col items-center gap-1 py-2">
           {/* Search icon */}
           <div className="relative">
             <button
@@ -235,7 +261,7 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle }: Sideb
         </nav>
 
         {/* Settings at very bottom */}
-        <div className="relative">
+        <div className="relative pb-2">
           <button
             onClick={() => navigate('/settings')}
             onMouseEnter={() => setHoveredItem('settings')}
@@ -256,11 +282,11 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle }: Sideb
     );
   }
 
-  // Desktop expanded: full sidebar
+  // Desktop expanded: full sidebar — full height, on top of header
   return (
-    <div className="hidden md:flex fixed left-0 top-14 bottom-0 w-72 bg-slate-50 z-30 flex-col animate-slide-in">
-      {/* Top row: Bow icon + Search bar */}
-      <div className="flex items-center gap-2 px-2 pt-2 pb-1">
+    <div className="hidden md:flex fixed left-0 top-0 bottom-0 w-72 bg-slate-50 z-50 flex-col animate-slide-in">
+      {/* Top row: Bow icon + Search bar (same height as header) */}
+      <div className="h-14 flex items-center gap-2 px-2 shrink-0">
         <button
           onClick={onToggle}
           className="p-2 rounded-lg hover:bg-slate-200 transition text-slate-600 shrink-0"
@@ -290,7 +316,7 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle }: Sideb
             className={`w-full flex items-center gap-3 px-4 py-3 transition ${
               isActive(item)
                 ? 'bg-primary/10 text-primary font-medium'
-                : 'text-slate-700 hover:bg-slate-50'
+                : 'text-slate-700 hover:bg-slate-100'
             }`}
           >
             {item.icon}
@@ -339,7 +365,7 @@ function SettingsButton({ pathname, navigate, showLabel }: { pathname: string; n
         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
           pathname === '/settings'
             ? 'bg-primary/10 text-primary font-medium'
-            : 'text-slate-700 hover:bg-slate-50'
+            : 'text-slate-700 hover:bg-slate-100'
         }`}
       >
         <SettingsIcon />
@@ -366,7 +392,7 @@ function ChatsList({
     <div>
       <button
         onClick={() => setChatsExpanded(!chatsExpanded)}
-        className="w-full flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-50 transition"
+        className="w-full flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-100 transition"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />

@@ -29,30 +29,16 @@ export default function Header({ onToggleSidebar, chatTitle, sidebarExpanded, is
   const userName = session?.user?.name || 'User';
   const initials = userName.charAt(0).toUpperCase();
 
-  // Desktop padding: when sidebar expanded, shift header right so brand is outside sidebar
+  // Desktop: header starts after sidebar (sidebar is on top of header area)
+  // Sidebar is always z-50, header is z-40. Sidebar covers the left portion.
   const headerPaddingLeft = isMobile ? undefined : sidebarExpanded ? '288px' : '56px';
-  // Hide bow icon from header when sidebar is expanded on desktop (it's inside sidebar)
-  const showBowInHeader = isMobile || !sidebarExpanded;
 
   return (
     <header
       className="fixed top-0 left-0 right-0 h-14 bg-white z-40 flex items-center px-3 transition-all duration-200"
       style={{ paddingLeft: headerPaddingLeft }}
     >
-      {/* Left: Menu icon (hidden when sidebar expanded on desktop — it's in the sidebar) */}
-      {showBowInHeader && (
-        <button
-          onClick={onToggleSidebar}
-          className="p-2 rounded-lg hover:bg-slate-100 transition text-slate-600 mr-2"
-          aria-label="Toggle sidebar"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-      )}
-
-      {/* Center/Left: Brand */}
+      {/* Brand - "My Story" shifts when sidebar opens */}
       <div className="flex-1 flex items-center min-w-0">
         {/* Desktop: brand always visible */}
         <Link href="/interview" className="hidden md:flex items-center gap-2 shrink-0">

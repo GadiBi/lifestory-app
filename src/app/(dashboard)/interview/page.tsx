@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -17,14 +17,8 @@ interface Interview {
   status: string;
 }
 
-const NEW_CHAT_PROMPTS = [
-  'What period would you like to talk about?',
-  'Which memory would you like to share?',
-  'Tell me about someone special in your life',
-  'What was a turning point in your story?',
-  'Share a moment that shaped who you are',
-  'What place holds special memories for you?',
-];
+// Single fixed prompt for new chat landing
+const NEW_CHAT_PROMPT = 'Would you like to share a new memory?';
 
 export default function InterviewPage() {
   const { data: session, status } = useSession();
@@ -71,10 +65,6 @@ export default function InterviewPage() {
     { code: 'ja-JP', label: 'JA' },
   ];
 
-  // Random prompt for new chat landing
-  const randomPrompt = useMemo(() => {
-    return NEW_CHAT_PROMPTS[Math.floor(Math.random() * NEW_CHAT_PROMPTS.length)];
-  }, []);
 
   // Generate a dynamic 3-word chat title from user messages
   const generateChatTitle = useCallback((msgs: Message[]) => {
@@ -203,7 +193,11 @@ export default function InterviewPage() {
 
     if (startNew) {
       router.replace('/interview');
-      startNewInterview();
+      // Show the new chat landing page, don't auto-start
+      setMessages([]);
+      setShowContinue(false);
+      setShowNewChat(true);
+      setInitializing(false);
     } else if (resumeId) {
       router.replace('/interview');
       loadInterview(resumeId);
@@ -612,21 +606,12 @@ export default function InterviewPage() {
           {/* Continue Landing Page */}
           {showLanding && showContinue && (
             <div className="flex flex-col items-start justify-center py-12 sm:py-20 max-w-md mx-auto">
-              {/* Greeting with logo inline */}
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
-                  <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 22v-8" />
-                    <path d="M9 22c0-2 1-3 3-3s3 1 3 3" />
-                    <path d="M12 14c-4 0-7-3-7-7 0-2.5 1.5-4.5 4-5.5.5 2 2 3 3 3s2.5-1 3-3c2.5 1 4 3 4 5.5 0 4-3 7-7 7z" />
-                  </svg>
-                </div>
-                <h1 className="text-lg font-semibold text-slate-900">
-                  Hi {session?.user?.name || 'there'}
-                </h1>
-              </div>
+              {/* Greeting - no logo */}
+              <p className="text-lg font-medium text-slate-600 mb-2">
+                Hi {session?.user?.name || 'there'}
+              </p>
 
-              {/* Subtitle */}
+              {/* Subtitle - same font, bigger size */}
               <p className="text-2xl font-medium text-slate-600 mb-10">
                 Let&apos;s continue building your life story
               </p>
@@ -687,23 +672,14 @@ export default function InterviewPage() {
           {/* New Chat Landing Page */}
           {showLanding && showNewChat && (
             <div className="flex flex-col items-start justify-center py-12 sm:py-20 max-w-md mx-auto">
-              {/* Greeting with logo inline */}
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
-                  <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 22v-8" />
-                    <path d="M9 22c0-2 1-3 3-3s3 1 3 3" />
-                    <path d="M12 14c-4 0-7-3-7-7 0-2.5 1.5-4.5 4-5.5.5 2 2 3 3 3s2.5-1 3-3c2.5 1 4 3 4 5.5 0 4-3 7-7 7z" />
-                  </svg>
-                </div>
-                <h1 className="text-lg font-semibold text-slate-900">
-                  Hi {session?.user?.name || 'there'}
-                </h1>
-              </div>
+              {/* Greeting - no logo */}
+              <p className="text-lg font-medium text-slate-600 mb-2">
+                Hi {session?.user?.name || 'there'}
+              </p>
 
-              {/* Random prompt */}
+              {/* Prompt */}
               <p className="text-2xl font-medium text-slate-600 mb-10">
-                {randomPrompt}
+                {NEW_CHAT_PROMPT}
               </p>
 
               {/* New Chat button with (+) icon */}
