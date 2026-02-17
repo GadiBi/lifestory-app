@@ -22,14 +22,12 @@ export default function PeoplePage() {
   const router = useRouter();
   const [people, setPeople] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newPersonName, setNewPersonName] = useState('');
+  const [newPersonRelationship, setNewPersonRelationship] = useState('Person');
+  const [addingPerson, setAddingPerson] = useState(false);
 
-  useEffect(() => {
-    if (status === 'loading') return;
-    if (!session) {
-      router.push('/login');
-      return;
-    }
-
+  function fetchPeople() {
     fetch('/api/people')
       .then(res => res.json())
       .then(data => {
@@ -37,7 +35,39 @@ export default function PeoplePage() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (!session) {
+      router.push('/login');
+      return;
+    }
+    fetchPeople();
   }, [session, status, router]);
+
+  async function addPerson() {
+    if (!newPersonName.trim()) return;
+    setAddingPerson(true);
+    try {
+      const res = await fetch('/api/people', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newPersonName.trim(), relationship: newPersonRelationship }),
+      });
+      if (res.ok) {
+        setNewPersonName('');
+        setNewPersonRelationship('Person');
+        setShowAddForm(false);
+        setLoading(true);
+        fetchPeople();
+      }
+    } catch (error) {
+      console.error('Failed to add person:', error);
+    } finally {
+      setAddingPerson(false);
+    }
+  }
 
   if (status === 'loading' || loading) {
     return (
@@ -60,6 +90,72 @@ export default function PeoplePage() {
   return (
     <div className="min-h-screen bg-white">
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 pt-16">
+        {/* Add Person Button & Form */}
+        <div className="mb-6">
+          {!showAddForm ? (
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition font-medium"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Person
+            </button>
+          ) : (
+            <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">
+              <input
+                type="text"
+                value={newPersonName}
+                onChange={(e) => setNewPersonName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') addPerson(); }}
+                placeholder="Name..."
+                className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                autoFocus
+              />
+              <select
+                value={newPersonRelationship}
+                onChange={(e) => setNewPersonRelationship(e.target.value)}
+                className="px-3 py-2.5 border border-slate-200 rounded-lg bg-white text-slate-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+              >
+                <option value="Person">Person</option>
+                <option value="Mother">Mother</option>
+                <option value="Father">Father</option>
+                <option value="Brother">Brother</option>
+                <option value="Sister">Sister</option>
+                <option value="Wife">Wife</option>
+                <option value="Husband">Husband</option>
+                <option value="Son">Son</option>
+                <option value="Daughter">Daughter</option>
+                <option value="Grandmother">Grandmother</option>
+                <option value="Grandfather">Grandfather</option>
+                <option value="Uncle">Uncle</option>
+                <option value="Aunt">Aunt</option>
+                <option value="Cousin">Cousin</option>
+                <option value="Friend">Friend</option>
+                <option value="Teacher/Mentor">Teacher/Mentor</option>
+                <option value="Colleague">Colleague</option>
+                <option value="Neighbor">Neighbor</option>
+              </select>
+              <button
+                onClick={addPerson}
+                disabled={addingPerson || !newPersonName.trim()}
+                className="px-4 py-2.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition font-medium disabled:opacity-50"
+              >
+                {addingPerson ? 'Adding...' : 'Add'}
+              </button>
+              <button
+                onClick={() => { setShowAddForm(false); setNewPersonName(''); }}
+                className="p-2 text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
+        </div>
+
         {people.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">

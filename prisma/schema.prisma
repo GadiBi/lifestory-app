@@ -19,6 +19,7 @@ model User {
   profile      Profile?
   media        Media[]
   sharedStories SharedStory[]
+  people        Person[]
 }
 
 model Profile {
@@ -105,6 +106,17 @@ model Media {
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   lifeEventId String?
   lifeEvent   LifeEvent? @relation(fields: [lifeEventId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
+
+model Person {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  relationship String   @default("Person")
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }

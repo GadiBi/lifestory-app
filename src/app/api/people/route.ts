@@ -45,6 +45,34 @@ interface PersonInfo {
   mentions: { type: 'event' | 'conversation'; id: string; title: string }[];
 }
 
+// POST /api/people - Manually add a person
+export async function POST(request: Request) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { name, relationship } = await request.json();
+    if (!name || !name.trim()) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
+
+    const person = await prisma.person.create({
+      data: {
+        userId: session.user.id,
+        name: name.trim(),
+        relationship: relationship || 'Person',
+      },
+    });
+
+    return NextResponse.json({ person }, { status: 201 });
+  } catch (error) {
+    console.error('People POST error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
 // GET /api/people - Extract people from user's conversations and life events
 export async function GET() {
   try {
@@ -54,7 +82,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const [events, interviews] = await Promise.all([
+    const [events, interviews, manualPeople] = await Promise.all([
       prisma.lifeEvent.findMany({
         where: { userId: session.user.id },
         select: { id: true, title: true, description: true },
@@ -62,6 +90,10 @@ export async function GET() {
       prisma.interview.findMany({
         where: { userId: session.user.id },
         select: { id: true, conversationLog: true, currentPeriod: true, updatedAt: true },
+      }),
+      prisma.person.findMany({
+        where: { userId: session.user.id },
+        orderBy: { createdAt: 'desc' },
       }),
     ]);
 
@@ -126,6 +158,20 @@ export async function GET() {
         }
       } catch {
         // Skip unparseable conversations
+      }
+    }
+
+    // Merge in manually added people
+    for (const mp of manualPeople) {
+      const key = mp.name.toLowerCase();
+      if (peopleMap.has(key)) {
+        const existing = peopleMap.get(key)!;
+        // Upgrade relationship if manual one is more specific
+        if (existing.relationship === 'Person' && mp.relationship !== 'Person') {
+          existing.relationship = mp.relationship;
+        }
+      } else {
+        peopleMap.set(key, { name: mp.name, relationship: mp.relationship, mentions: [] });
       }
     }
 

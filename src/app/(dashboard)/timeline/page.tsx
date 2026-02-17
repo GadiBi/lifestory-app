@@ -59,6 +59,9 @@ export default function TimelinePage() {
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string | null } | null>(null);
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newMemoryTitle, setNewMemoryTitle] = useState('');
+  const [addingMemory, setAddingMemory] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -116,6 +119,27 @@ export default function TimelinePage() {
     }
   }
 
+  async function addMemory() {
+    if (!newMemoryTitle.trim()) return;
+    setAddingMemory(true);
+    try {
+      const res = await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newMemoryTitle.trim() }),
+      });
+      if (res.ok) {
+        setNewMemoryTitle('');
+        setShowAddForm(false);
+        fetchEvents();
+      }
+    } catch (error) {
+      console.error('Failed to add memory:', error);
+    } finally {
+      setAddingMemory(false);
+    }
+  }
+
   function toggleExpanded(eventId: string) {
     setExpandedEvents(prev => {
       const next = new Set(prev);
@@ -155,6 +179,15 @@ export default function TimelinePage() {
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={() => setShowAddForm(!showAddForm)}
+                className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition font-medium"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Add Memory
+              </button>
               <div className="flex bg-slate-100 rounded-lg p-1">
                 <button
                   onClick={() => setViewMode('timeline')}
@@ -198,6 +231,38 @@ export default function TimelinePage() {
           </div>
         </div>
       </header>
+
+      {/* Add Memory Form */}
+      {showAddForm && (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4">
+          <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">
+            <input
+              type="text"
+              value={newMemoryTitle}
+              onChange={(e) => setNewMemoryTitle(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') addMemory(); }}
+              placeholder="Memory title..."
+              className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+              autoFocus
+            />
+            <button
+              onClick={addMemory}
+              disabled={addingMemory || !newMemoryTitle.trim()}
+              className="px-4 py-2.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition font-medium disabled:opacity-50"
+            >
+              {addingMemory ? 'Adding...' : 'Add'}
+            </button>
+            <button
+              onClick={() => { setShowAddForm(false); setNewMemoryTitle(''); }}
+              className="p-2 text-slate-400 hover:text-slate-600"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {loading ? (

@@ -57,23 +57,25 @@ export async function POST(request: Request) {
 
     const { title, description, date, period, category, emotions, interviewId } = await request.json();
 
-    if (!title || !description) {
+    if (!title) {
       return NextResponse.json(
-        { error: 'Title and description are required' },
+        { error: 'Title is required' },
         { status: 400 }
       );
     }
 
     const titleError = validateStringLength(title, 'title', 200);
     if (titleError) return NextResponse.json({ error: titleError }, { status: 400 });
-    const descError = validateStringLength(description, 'description', 10000);
-    if (descError) return NextResponse.json({ error: descError }, { status: 400 });
+    if (description) {
+      const descError = validateStringLength(description, 'description', 10000);
+      if (descError) return NextResponse.json({ error: descError }, { status: 400 });
+    }
 
     const event = await prisma.lifeEvent.create({
       data: {
         userId: session.user.id,
         title,
-        description,
+        description: description || '',
         date: date ? new Date(date) : null,
         period,
         category,

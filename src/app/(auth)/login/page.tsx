@@ -11,6 +11,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const [rememberMe, setRememberMe] = useState(true);
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
@@ -24,6 +26,7 @@ export default function LoginPage() {
       const result = await signIn('credentials', {
         username,
         password,
+        rememberMe: rememberMe ? 'true' : 'false',
         redirect: false,
       });
 
@@ -110,6 +113,19 @@ export default function LoginPage() {
                 )}
               </button>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              id="rememberMe"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
+            />
+            <label htmlFor="rememberMe" className="text-sm text-slate-600">
+              Remember me
+            </label>
           </div>
 
           <button

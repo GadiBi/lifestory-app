@@ -10,6 +10,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       credentials: {
         username: { label: 'Username', type: 'text' },
         password: { label: 'Password', type: 'password' },
+        rememberMe: { label: 'Remember Me', type: 'text' },
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
@@ -37,6 +38,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           id: user.id,
           name: user.username,
           email: user.email,
+          rememberMe: credentials.rememberMe === 'true',
         };
       },
     }),
@@ -52,6 +54,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        // If not "remember me", set short expiry (session closes with browser)
+        if (!(user as Record<string, unknown>).rememberMe) {
+          token.maxAge = 0; // Session cookie (no max-age = browser session)
+        }
       }
       return token;
     },

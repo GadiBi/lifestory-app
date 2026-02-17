@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -14,7 +13,6 @@ interface HeaderProps {
 
 export default function Header({ onToggleSidebar, chatTitle, sidebarExpanded, isMobile }: HeaderProps) {
   const { data: session } = useSession();
-  const router = useRouter();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -31,49 +29,40 @@ export default function Header({ onToggleSidebar, chatTitle, sidebarExpanded, is
   const userName = session?.user?.name || 'User';
   const initials = userName.charAt(0).toUpperCase();
 
-  // Desktop padding to shift header content when sidebar is open
+  // Desktop padding: when sidebar expanded, shift header right so brand is outside sidebar
   const headerPaddingLeft = isMobile ? undefined : sidebarExpanded ? '288px' : '56px';
+  // Hide bow icon from header when sidebar is expanded on desktop (it's inside sidebar)
+  const showBowInHeader = isMobile || !sidebarExpanded;
 
   return (
     <header
       className="fixed top-0 left-0 right-0 h-14 bg-white z-40 flex items-center px-3 transition-all duration-200"
       style={{ paddingLeft: headerPaddingLeft }}
     >
-      {/* Left: Menu icon */}
-      <button
-        onClick={onToggleSidebar}
-        className="p-2 rounded-lg hover:bg-slate-100 transition text-slate-600 mr-2"
-        aria-label="Toggle sidebar"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-
-      {/* Search box when sidebar is expanded on desktop */}
-      {sidebarExpanded && !isMobile && (
+      {/* Left: Menu icon (hidden when sidebar expanded on desktop — it's in the sidebar) */}
+      {showBowInHeader && (
         <button
-          onClick={() => router.push('/search')}
-          className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-400 hover:border-slate-300 hover:text-slate-500 transition text-sm mr-3"
+          onClick={onToggleSidebar}
+          className="p-2 rounded-lg hover:bg-slate-100 transition text-slate-600 mr-2"
+          aria-label="Toggle sidebar"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
-          Search...
         </button>
       )}
 
-      {/* Center/Left: Brand or Chat Title */}
+      {/* Center/Left: Brand */}
       <div className="flex-1 flex items-center min-w-0">
-        {/* Desktop: brand on left, always visible */}
+        {/* Desktop: brand always visible */}
         <Link href="/interview" className="hidden md:flex items-center gap-2 shrink-0">
-          <span className="font-bold text-lg text-primary">LifeStory Agent</span>
+          <span className="font-bold text-lg text-primary">My Story</span>
         </Link>
 
         {/* Mobile: centered brand or chat title */}
         <div className="md:hidden flex-1 text-center">
           <span className="font-semibold text-base text-primary truncate">
-            {chatTitle || 'LifeStory Agent'}
+            {chatTitle || 'My Story'}
           </span>
         </div>
       </div>
@@ -87,7 +76,6 @@ export default function Header({ onToggleSidebar, chatTitle, sidebarExpanded, is
           {initials}
         </button>
 
-        {/* User dropdown menu */}
         {userMenuOpen && (
           <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-lg border border-slate-200 py-1 z-50">
             <button
