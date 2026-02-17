@@ -600,19 +600,11 @@ export default function InterviewPage() {
     );
   }
 
-  // Show a subtle loading state while initializing (no full-page jump)
+  // Subtle loading — same layout shape, no jumping
   if (initializing) {
     return (
       <div className="min-h-screen bg-white flex flex-col">
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto px-4 py-6">
-            <div className="flex flex-col items-start justify-center py-12 sm:py-20 max-w-md mx-auto">
-              <div className="h-6 w-32 bg-slate-100 rounded animate-pulse mb-3" />
-              <div className="h-8 w-64 bg-slate-100 rounded animate-pulse mb-10" />
-              <div className="h-12 w-48 bg-slate-100 rounded-xl animate-pulse" />
-            </div>
-          </div>
-        </main>
+        <main className="flex-1" />
       </div>
     );
   }
