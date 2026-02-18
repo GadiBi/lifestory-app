@@ -15,16 +15,6 @@ interface PastChat {
 
 const NAV_ITEMS = [
   {
-    id: 'interview',
-    label: 'Ongoing Chat',
-    href: '/interview',
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-      </svg>
-    ),
-  },
-  {
     id: 'new',
     label: 'New Chat',
     href: '/interview?new=true',
@@ -109,13 +99,8 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle, chatTit
   }
 
   function isActive(item: typeof NAV_ITEMS[0]) {
-    if (item.id === 'interview') {
-      // Continue Chat is active when on /interview AND chat has a real title (not New Chat)
-      return pathname === '/interview' && !!chatTitle && chatTitle !== 'New Chat';
-    }
     if (item.id === 'new') {
-      // New Chat is active when on /interview AND title is New Chat or null
-      return pathname === '/interview' && (!chatTitle || chatTitle === 'New Chat');
+      return pathname === '/interview';
     }
     return pathname === item.href;
   }
@@ -171,7 +156,7 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle, chatTit
                 }`}
               >
                 {item.icon}
-                <span className={`text-sm ${item.id === 'interview' || item.id === 'new' ? 'font-bold' : ''}`}>{item.label}</span>
+                <span className={`text-sm ${item.id === 'new' ? 'font-bold' : ''}`}>{item.label}</span>
               </button>
             ))}
 

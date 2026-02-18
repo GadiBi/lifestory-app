@@ -37,8 +37,8 @@ export default function Header({ onToggleSidebar, chatTitle, sidebarExpanded, is
       className="fixed top-0 left-0 right-0 h-14 bg-white z-40 flex items-center px-4 md:px-6 transition-all duration-200"
       style={{ paddingLeft: headerPaddingLeft }}
     >
-      {/* Mobile: hamburger icon to open sidebar */}
-      {isMobile && (
+      {/* Mobile: hamburger icon to open sidebar — hide when sidebar is open */}
+      {isMobile && !sidebarExpanded && (
         <button
           onClick={onToggleSidebar}
           className="p-2 rounded-lg hover:bg-slate-100 transition text-slate-600 mr-1"

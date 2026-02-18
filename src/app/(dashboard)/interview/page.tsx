@@ -18,7 +18,8 @@ interface Interview {
 }
 
 // Single fixed prompt for new chat landing
-const NEW_CHAT_PROMPT = 'Which memory is on your mind?';
+const NEW_CHAT_PROMPT_LINE1 = 'Which memory would';
+const NEW_CHAT_PROMPT_LINE2 = 'you like sharing?';
 
 export default function InterviewPage() {
   const { data: session, status } = useSession();
@@ -43,6 +44,7 @@ export default function InterviewPage() {
   const [showNewChat, setShowNewChat] = useState(false);
   const [liveFeedTitle, setLiveFeedTitle] = useState<string | null>(null);
   const [lastChatTitle, setLastChatTitle] = useState<string | null>(null);
+  const [recentChats, setRecentChats] = useState<Array<{ id: string; title: string }>>([]);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   // Audio recording state
@@ -264,9 +266,21 @@ export default function InterviewPage() {
             await getOpeningMessage(data.interview.id);
           }
         } else if (hasUserMessages) {
-          // Show continue screen — compute the title from messages
+          // Show continue screen — compute the title and fetch recent chats
           const title = generateChatTitle(data.messages);
           setLastChatTitle(title !== 'New Chat' ? title : null);
+          // Fetch recent chats for the welcome page
+          try {
+            const chatsRes = await fetch('/api/interview/chat');
+            if (chatsRes.ok) {
+              const chatsData = await chatsRes.json();
+              const chats = (chatsData.interviews || [])
+                .filter((c: { messageCount: number }) => c.messageCount > 0)
+                .slice(0, 5)
+                .map((c: { id: string; preview: string }) => ({ id: c.id, title: c.preview || 'Untitled chat' }));
+              setRecentChats(chats);
+            }
+          } catch { /* ignore */ }
           setShowContinue(true);
         } else {
           // No user messages - show new chat landing
@@ -617,17 +631,22 @@ export default function InterviewPage() {
       {/* Messages area */}
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 py-6">
-          {/* Continue Landing Page */}
+          {/* Welcome Page (after login) */}
           {showLanding && showContinue && (
             <div className="flex flex-col items-start justify-center py-12 sm:py-20 max-w-md mx-auto">
-              {/* Greeting */}
-              <p className="text-lg font-medium text-slate-600 mb-2">
+              {/* Line 1: Hi Username (smaller) */}
+              <p className="text-base font-medium text-slate-600 mb-1">
                 Hi {session?.user?.name || 'there'}
               </p>
 
-              {/* Continue our last chat — gradient colored */}
+              {/* Line 2: Great you're back */}
+              <p className="text-xl font-medium text-slate-600 mb-1">
+                Great you&apos;re back
+              </p>
+
+              {/* Line 3: Let's add more memories! (rainbow) */}
               <p
-                className="text-2xl font-bold mb-3"
+                className="text-xl font-bold mb-2"
                 style={{
                   background: 'linear-gradient(90deg, #f472b6, #fb923c, #fbbf24, #34d399, #60a5fa, #a78bfa)',
                   WebkitBackgroundClip: 'text',
@@ -635,47 +654,49 @@ export default function InterviewPage() {
                   backgroundClip: 'text',
                 }}
               >
-                Continue our last chat:
+                Let&apos;s add more memories!
               </p>
 
-              {/* Last chat title */}
-              {lastChatTitle && (
-                <p className="text-lg font-semibold text-primary mb-6">
-                  {lastChatTitle}
-                </p>
-              )}
-              {!lastChatTitle && <div className="mb-6" />}
-
-              {/* Continue button */}
-              <button
-                onClick={handleContinueChat}
-                className="px-10 py-4 bg-primary hover:bg-primary-dark text-white rounded-xl transition font-semibold text-lg mb-6 shadow-sm"
-              >
-                Continue last chat
-              </button>
-
-              {/* "or" divider */}
-              <p className="text-sm text-slate-400 mb-4">or</p>
-
-              {/* Share a new memory — gradient colored */}
-              <p
-                className="text-2xl font-bold mb-4"
-                style={{
-                  background: 'linear-gradient(90deg, #f472b6, #fb923c, #fbbf24, #34d399, #60a5fa, #a78bfa)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                Share a new memory
+              {/* Line 4: Would you like to */}
+              <p className="text-xl font-medium text-slate-600 mb-4">
+                Would you like to
               </p>
 
-              {/* Start new chat button */}
+              {/* Resume previous chats */}
+              <p className="text-xl font-medium text-slate-600 mb-3">
+                Resume previous chats:
+              </p>
+
+              {/* List of recent chats (up to 5) */}
+              <div className="flex flex-col gap-2 mb-6 w-full">
+                {recentChats.map((chat) => (
+                  <button
+                    key={chat.id}
+                    onClick={() => { setShowContinue(false); loadInterview(chat.id); }}
+                    className="text-left text-lg font-semibold text-primary hover:text-primary-dark transition truncate"
+                  >
+                    {chat.title}
+                  </button>
+                ))}
+                {recentChats.length === 0 && lastChatTitle && (
+                  <button
+                    onClick={handleContinueChat}
+                    className="text-left text-lg font-semibold text-primary hover:text-primary-dark transition truncate"
+                  >
+                    {lastChatTitle}
+                  </button>
+                )}
+              </div>
+
+              {/* Or */}
+              <p className="text-xl font-medium text-slate-600 mb-4">Or:</p>
+
+              {/* Start a new chat (colored link) */}
               <button
                 onClick={handleStartNewChat}
-                className="px-10 py-4 bg-primary hover:bg-primary-dark text-white rounded-xl transition font-semibold text-lg shadow-sm"
+                className="text-xl font-semibold text-primary hover:text-primary-dark transition"
               >
-                Start new chat
+                Start a new chat
               </button>
             </div>
           )}
@@ -698,7 +719,7 @@ export default function InterviewPage() {
                   backgroundClip: 'text',
                 }}
               >
-                {NEW_CHAT_PROMPT}
+                {NEW_CHAT_PROMPT_LINE1}<br />{NEW_CHAT_PROMPT_LINE2}
               </p>
 
               {/* Chat input textarea — replaces the button */}
@@ -777,7 +798,7 @@ export default function InterviewPage() {
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Upload a Story
+                  Upload Story
                 </Link>
                 <Link
                   href="/upload"
@@ -806,7 +827,7 @@ export default function InterviewPage() {
                             <path d="M12 12v3M12 10c-1.5 0-2.5-1-2.5-2.5S10.5 5 12 5s2.5 1 2.5 2.5S13.5 10 12 10z" />
                           </svg>
                         </div>
-                        <span className="text-xs font-medium text-slate-500">My Story</span>
+                        <span className="text-xs font-medium text-slate-500">Bestie</span>
                       </div>
                     )}
                     <div className={`px-4 py-3 rounded-2xl ${
