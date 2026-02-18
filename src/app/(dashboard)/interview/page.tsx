@@ -568,7 +568,7 @@ export default function InterviewPage() {
         <div className="max-w-3xl mx-auto px-4 py-6">
           {/* New Chat Landing Page */}
           {showLanding && (
-            <div className="flex flex-col items-start justify-center py-12 sm:py-20 max-w-lg mx-auto w-full">
+            <div className="flex flex-col items-start justify-start pt-2 sm:pt-4 max-w-lg mx-auto w-full">
               {/* Greeting - no logo */}
               <p className="text-lg font-medium text-slate-600 mb-2">
                 Hi {session?.user?.name || 'there'}

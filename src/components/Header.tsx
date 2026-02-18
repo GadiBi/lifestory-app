@@ -65,8 +65,8 @@ export default function Header({ onToggleSidebar, chatTitle, sidebarExpanded, is
         </Link>
       </div>
 
-      {/* Mobile: Gradient logo */}
-      {isMobile && (
+      {/* Mobile: Gradient logo — hide when sidebar is open */}
+      {isMobile && !sidebarExpanded && (
         <Link href="/welcome" className="flex items-center shrink-0 ml-1">
           <span
             className="font-bold text-lg"

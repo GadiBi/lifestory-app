@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
 interface PastChat {
   id: string;
@@ -67,10 +67,22 @@ interface SidebarProps {
 export default function Sidebar({ expanded, isMobile, onClose, onToggle, chatTitle }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [chatsExpanded, setChatsExpanded] = useState(false);
   const [pastChats, setPastChats] = useState<PastChat[]>([]);
   const [loadingChats, setLoadingChats] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+
+  // The active chat ID from URL (e.g. /interview?id=xxx)
+  const activeChatId = pathname === '/interview' ? searchParams.get('id') : null;
+  const isNewChat = pathname === '/interview' && searchParams.get('new') === 'true';
+
+  // Auto-expand chats when sidebar opens
+  useEffect(() => {
+    if (expanded) {
+      setChatsExpanded(true);
+    }
+  }, [expanded]);
 
   useEffect(() => {
     if (chatsExpanded && pastChats.length === 0) {
@@ -100,7 +112,8 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle, chatTit
 
   function isActive(item: typeof NAV_ITEMS[0]) {
     if (item.id === 'new') {
-      return pathname === '/interview';
+      // Only highlight New Chat if explicitly on new chat, or on /interview with no specific chat loaded
+      return pathname === '/interview' && !activeChatId;
     }
     return pathname === item.href;
   }
@@ -167,6 +180,7 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle, chatTit
               loadingChats={loadingChats}
               pastChats={pastChats}
               navigate={navigate}
+              activeChatId={activeChatId}
             />
           </nav>
 
@@ -323,6 +337,7 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle, chatTit
           loadingChats={loadingChats}
           pastChats={pastChats}
           navigate={navigate}
+          activeChatId={activeChatId}
         />
       </nav>
 
@@ -373,12 +388,14 @@ function ChatsList({
   loadingChats,
   pastChats,
   navigate,
+  activeChatId,
 }: {
   chatsExpanded: boolean;
   setChatsExpanded: (v: boolean) => void;
   loadingChats: boolean;
   pastChats: PastChat[];
   navigate: (href: string) => void;
+  activeChatId: string | null;
 }) {
   return (
     <div>
@@ -409,9 +426,13 @@ function ChatsList({
               <button
                 key={chat.id}
                 onClick={() => navigate(`/interview?id=${chat.id}`)}
-                className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 transition group"
+                className={`w-full text-left px-3 py-2 rounded-lg transition group ${
+                  activeChatId === chat.id
+                    ? 'bg-primary/10 text-primary'
+                    : 'hover:bg-slate-100'
+                }`}
               >
-                <p className="text-sm text-slate-700 truncate">{chat.preview || 'New conversation'}</p>
+                <p className={`text-sm truncate ${activeChatId === chat.id ? 'text-primary font-medium' : 'text-slate-700'}`}>{chat.preview || 'New conversation'}</p>
                 <p className="text-xs text-slate-400 mt-0.5">
                   {new Date(chat.createdAt).toLocaleDateString()} — {new Date(chat.updatedAt).toLocaleDateString()}
                 </p>

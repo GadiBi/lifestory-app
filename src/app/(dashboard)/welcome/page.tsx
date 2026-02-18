@@ -69,34 +69,33 @@ export default function WelcomePage() {
       <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-20 sm:pt-28">
         <div className="flex flex-col items-start max-w-md mx-auto">
           {/* Line 1: Hi Username */}
-          <p className="text-base text-slate-600 mb-3">
+          <p className="text-base text-slate-600 mb-1">
             Hi {userName}
           </p>
 
-          {/* Line 2-3: Let's add / more memories! (rainbow, bigger) */}
+          {/* Line 2: Let's add (rainbow, bigger) */}
+          {/* Line 3: more memories! (rainbow, bigger) */}
           <p
-            className="text-2xl sm:text-3xl font-bold mb-6"
+            className="text-xl sm:text-2xl font-bold mb-4"
             style={RAINBOW_STYLE}
           >
             Let&apos;s add<br />more memories!
           </p>
 
-          {/* Line 4: empty space */}
-
-          {/* Line 5: Resume previous chats */}
+          {/* Line 4: Resume previous chats */}
           {recentChats.length > 0 && (
             <>
-              <p className="text-base text-slate-600 mb-3">
-                Resume previous chats:
+              <p className="text-base text-slate-600 mb-2">
+                Resume previous chats
               </p>
 
-              {/* Chat list */}
-              <div className="flex flex-col gap-2 mb-5 w-full">
+              {/* Chat list — up to 4, each on new line */}
+              <div className="flex flex-col gap-1.5 mb-4 w-full">
                 {recentChats.map((chat) => (
                   <button
                     key={chat.id}
                     onClick={() => router.push(`/interview?id=${chat.id}`)}
-                    className="text-left text-base font-semibold text-primary hover:text-primary-dark transition truncate"
+                    className="text-left text-base text-primary hover:text-primary-dark transition truncate"
                   >
                     {chat.title}
                   </button>
@@ -104,14 +103,14 @@ export default function WelcomePage() {
               </div>
 
               {/* Or */}
-              <p className="text-base text-slate-600 mb-3">Or</p>
+              <p className="text-base text-slate-600 mb-2">Or</p>
             </>
           )}
 
           {/* Start a new chat */}
           <button
             onClick={() => router.push('/interview?new=true')}
-            className="text-base font-semibold text-primary hover:text-primary-dark transition"
+            className="text-base text-primary hover:text-primary-dark transition"
           >
             Start a new chat
           </button>
