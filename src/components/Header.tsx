@@ -52,7 +52,7 @@ export default function Header({ onToggleSidebar, chatTitle, sidebarExpanded, is
 
       {/* Left: Brand (desktop only) */}
       <div className="hidden md:flex items-center shrink-0 ml-6">
-        <Link href="/interview" className="flex items-center gap-2">
+        <Link href="/welcome" className="flex items-center gap-2">
           <span
             className="font-bold text-lg"
             style={{
@@ -67,7 +67,7 @@ export default function Header({ onToggleSidebar, chatTitle, sidebarExpanded, is
 
       {/* Mobile: Gradient logo */}
       {isMobile && (
-        <Link href="/interview" className="flex items-center shrink-0 ml-1">
+        <Link href="/welcome" className="flex items-center shrink-0 ml-1">
           <span
             className="font-bold text-lg"
             style={{

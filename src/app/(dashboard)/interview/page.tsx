@@ -40,11 +40,8 @@ export default function InterviewPage() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [speechSupported, setSpeechSupported] = useState(true);
   const [speechError, setSpeechError] = useState<string | null>(null);
-  const [showContinue, setShowContinue] = useState(false);
   const [showNewChat, setShowNewChat] = useState(false);
   const [liveFeedTitle, setLiveFeedTitle] = useState<string | null>(null);
-  const [lastChatTitle, setLastChatTitle] = useState<string | null>(null);
-  const [recentChats, setRecentChats] = useState<Array<{ id: string; title: string }>>([]);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   // Audio recording state
@@ -202,21 +199,19 @@ export default function InterviewPage() {
       // Show the new chat landing page, don't auto-start
       setMessages([]);
       setInterview(null);
-      setShowContinue(false);
       setShowNewChat(true);
       setInitializing(false);
     } else if (resumeId) {
       loadInterview(resumeId);
       setInitializing(false);
     } else {
-      // Always show the landing page (continue or new chat)
-      initializeInterview(false);
+      // Show new chat landing
+      initializeInterview();
     }
   }, [session, status, router, searchParams]);
 
   async function loadInterview(interviewId: string) {
     setLoading(true);
-    setShowContinue(false);
     setShowNewChat(false);
     try {
       const response = await fetch('/api/interview/chat', {
@@ -236,7 +231,7 @@ export default function InterviewPage() {
     }
   }
 
-  async function initializeInterview(skipContinue = false) {
+  async function initializeInterview() {
     try {
       const profileRes = await fetch('/api/profile');
       if (profileRes.ok) {
@@ -249,44 +244,8 @@ export default function InterviewPage() {
           setVoiceLang(langMap[profileData.profile.language] || '');
         }
       }
-      const response = await fetch('/api/interview/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      });
-      const data = await response.json();
-      if (data.interview) {
-        setInterview(data.interview);
-        // Check if the interview has actual user messages (not just AI opening)
-        const hasUserMessages = data.messages?.some((m: Message) => m.role === 'user');
-        if (skipContinue) {
-          if (data.messages && data.messages.length > 0) {
-            setMessages(data.messages);
-          } else {
-            await getOpeningMessage(data.interview.id);
-          }
-        } else if (hasUserMessages) {
-          // Show continue screen — compute the title and fetch recent chats
-          const title = generateChatTitle(data.messages);
-          setLastChatTitle(title !== 'New Chat' ? title : null);
-          // Fetch recent chats for the welcome page
-          try {
-            const chatsRes = await fetch('/api/interview/chat');
-            if (chatsRes.ok) {
-              const chatsData = await chatsRes.json();
-              const chats = (chatsData.interviews || [])
-                .filter((c: { messageCount: number }) => c.messageCount > 0)
-                .slice(0, 5)
-                .map((c: { id: string; preview: string }) => ({ id: c.id, title: c.preview || 'Untitled chat' }));
-              setRecentChats(chats);
-            }
-          } catch { /* ignore */ }
-          setShowContinue(true);
-        } else {
-          // No user messages - show new chat landing
-          setShowNewChat(true);
-        }
-      }
+      // No params = show new chat landing
+      setShowNewChat(true);
     } catch (error) {
       console.error('Failed to initialize:', error);
     } finally {
@@ -294,31 +253,8 @@ export default function InterviewPage() {
     }
   }
 
-  async function handleContinueChat() {
-    if (!interview) return;
-    setShowContinue(false);
-    sessionStorage.setItem('hasSeenContinue', 'true');
-    setLoading(true);
-    try {
-      const response = await fetch('/api/interview/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ interviewId: interview.id }),
-      });
-      const data = await response.json();
-      if (data.messages) {
-        setMessages(data.messages);
-      }
-    } catch (error) {
-      console.error('Failed to load messages:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   async function handleStartNewChat() {
     setShowNewChat(false);
-    setShowContinue(false);
     sessionStorage.setItem('hasSeenContinue', 'true');
     setInitializing(true);
     setMessages([]);
@@ -593,7 +529,6 @@ export default function InterviewPage() {
     // Show new chat landing page instead of immediately starting
     setMessages([]);
     setInterview(null);
-    setShowContinue(false);
     setShowNewChat(true);
     setInitializing(false);
     // Reset so sidebar navigation works again
@@ -623,86 +558,16 @@ export default function InterviewPage() {
     );
   }
 
-  // Landing pages (Continue or New Chat)
-  const showLanding = (showContinue || showNewChat) && messages.length === 0;
+  // Landing page (New Chat)
+  const showLanding = showNewChat && messages.length === 0;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
       {/* Messages area */}
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 py-6">
-          {/* Welcome Page (after login) */}
-          {showLanding && showContinue && (
-            <div className="flex flex-col items-start justify-center py-12 sm:py-20 max-w-md mx-auto">
-              {/* Line 1: Hi Username (smaller) */}
-              <p className="text-base font-medium text-slate-600 mb-1">
-                Hi {session?.user?.name || 'there'}
-              </p>
-
-              {/* Line 2: Great you're back */}
-              <p className="text-xl font-medium text-slate-600 mb-1">
-                Great you&apos;re back
-              </p>
-
-              {/* Line 3: Let's add more memories! (rainbow) */}
-              <p
-                className="text-xl font-bold mb-2"
-                style={{
-                  background: 'linear-gradient(90deg, #f472b6, #fb923c, #fbbf24, #34d399, #60a5fa, #a78bfa)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                Let&apos;s add more memories!
-              </p>
-
-              {/* Line 4: Would you like to */}
-              <p className="text-xl font-medium text-slate-600 mb-4">
-                Would you like to
-              </p>
-
-              {/* Resume previous chats */}
-              <p className="text-xl font-medium text-slate-600 mb-3">
-                Resume previous chats:
-              </p>
-
-              {/* List of recent chats (up to 5) */}
-              <div className="flex flex-col gap-2 mb-6 w-full">
-                {recentChats.map((chat) => (
-                  <button
-                    key={chat.id}
-                    onClick={() => { setShowContinue(false); loadInterview(chat.id); }}
-                    className="text-left text-lg font-semibold text-primary hover:text-primary-dark transition truncate"
-                  >
-                    {chat.title}
-                  </button>
-                ))}
-                {recentChats.length === 0 && lastChatTitle && (
-                  <button
-                    onClick={handleContinueChat}
-                    className="text-left text-lg font-semibold text-primary hover:text-primary-dark transition truncate"
-                  >
-                    {lastChatTitle}
-                  </button>
-                )}
-              </div>
-
-              {/* Or */}
-              <p className="text-xl font-medium text-slate-600 mb-4">Or:</p>
-
-              {/* Start a new chat (colored link) */}
-              <button
-                onClick={handleStartNewChat}
-                className="text-xl font-semibold text-primary hover:text-primary-dark transition"
-              >
-                Start a new chat
-              </button>
-            </div>
-          )}
-
           {/* New Chat Landing Page */}
-          {showLanding && showNewChat && (
+          {showLanding && (
             <div className="flex flex-col items-start justify-center py-12 sm:py-20 max-w-lg mx-auto w-full">
               {/* Greeting - no logo */}
               <p className="text-lg font-medium text-slate-600 mb-2">

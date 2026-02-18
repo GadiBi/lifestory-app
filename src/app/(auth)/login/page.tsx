@@ -33,7 +33,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError('Invalid username or password');
       } else {
-        router.push('/interview');
+        router.push('/welcome');
         router.refresh();
       }
     } catch {
