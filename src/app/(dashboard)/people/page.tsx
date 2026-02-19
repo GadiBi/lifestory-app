@@ -89,7 +89,12 @@ export default function PeoplePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 pt-16">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-12">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-xl font-semibold text-slate-900">Relations</h1>
+        </div>
+
         {/* Add Person Button & Form */}
         <div className="mb-6">
           {!showAddForm ? (

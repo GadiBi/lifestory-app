@@ -349,8 +349,7 @@ ${divider}
     <div className="min-h-screen bg-white">
       <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3 ml-14">
-          </div>
+          <h1 className="text-xl font-semibold text-slate-900">Life Story</h1>
           {lifeScript && (
             <div className="flex gap-2">
               <button onClick={copyToClipboard} className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition" title="Copy">
