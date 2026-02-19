@@ -240,13 +240,37 @@ export default function TimelineEditPage() {
               </svg>
             </div>
             <p className="text-slate-600 mb-2">Your timeline is empty</p>
-            <p className="text-sm text-slate-400 mb-6">Start a conversation with Bestie and your timeline will be built automatically</p>
-            <button
-              onClick={() => router.push('/interview?new=true')}
-              className="px-5 py-2.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition font-medium"
-            >
-              Start a conversation
-            </button>
+            <p className="text-sm text-slate-400 mb-6">Extract events from your past conversations or start a new chat</p>
+            <div className="flex flex-col items-center gap-3">
+              <button
+                onClick={async () => {
+                  setSaving(true);
+                  try {
+                    const res = await fetch('/api/interview/extract-all', { method: 'POST' });
+                    const data = await res.json();
+                    if (data.totalEvents > 0) {
+                      await fetchEntries();
+                    } else {
+                      alert(data.message || 'No events found in past conversations');
+                    }
+                  } catch {
+                    alert('Failed to extract');
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                disabled={saving}
+                className="px-5 py-2.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition font-medium disabled:opacity-50"
+              >
+                {saving ? 'Extracting...' : 'Extract from past conversations'}
+              </button>
+              <button
+                onClick={() => router.push('/interview?new=true&context=timeline')}
+                className="px-5 py-2.5 text-primary text-sm rounded-lg border border-primary/20 hover:bg-primary/5 transition font-medium"
+              >
+                Start a new conversation
+              </button>
+            </div>
           </div>
         ) : (
           <div className="relative">
