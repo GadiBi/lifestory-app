@@ -25,8 +25,8 @@ const NAV_ITEMS = [
     ),
   },
   {
-    id: 'timeline',
-    label: 'My Memories',
+    id: 'memories',
+    label: 'Memories',
     href: '/timeline',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,22 +35,32 @@ const NAV_ITEMS = [
     ),
   },
   {
-    id: 'life-script',
-    label: 'My Story',
-    href: '/life-script',
+    id: 'timeline-edit',
+    label: 'Timeline',
+    href: '/timeline-edit',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
   },
   {
-    id: 'people',
-    label: 'People in My Life',
+    id: 'relations',
+    label: 'Relations',
     href: '/people',
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+      </svg>
+    ),
+  },
+  {
+    id: 'life-script',
+    label: 'Life Story',
+    href: '/life-script',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
       </svg>
     ),
   },
@@ -112,8 +122,16 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle, chatTit
 
   function isActive(item: typeof NAV_ITEMS[0]) {
     if (item.id === 'new') {
-      // Only highlight New Chat if explicitly on new chat, or on /interview with no specific chat loaded
       return pathname === '/interview' && !activeChatId;
+    }
+    if (item.id === 'memories') {
+      return pathname === '/timeline';
+    }
+    if (item.id === 'timeline-edit') {
+      return pathname === '/timeline-edit';
+    }
+    if (item.id === 'relations') {
+      return pathname === '/people';
     }
     return pathname === item.href;
   }
@@ -248,22 +266,7 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle, chatTit
             </div>
           ))}
 
-          {/* Chats icon */}
-          <div className="relative">
-            <button
-              onClick={() => navigate('/interview?history=true')}
-              onMouseEnter={() => setHoveredItem('chats')}
-              onMouseLeave={() => setHoveredItem(null)}
-              className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-              </svg>
-            </button>
-            {hoveredItem === 'chats' && (
-              <Tooltip label="Chats" />
-            )}
-          </div>
+          {/* Chats - no icon in collapsed view */}
         </nav>
 
         {/* Settings at very bottom */}
@@ -326,7 +329,7 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle, chatTit
             }`}
           >
             {item.icon}
-            <span className={`text-sm ${item.id === 'interview' || item.id === 'new' ? 'font-bold' : ''}`}>{item.label}</span>
+            <span className={`text-sm ${item.id === 'new' ? 'font-bold' : ''}`}>{item.label}</span>
           </button>
         ))}
 
@@ -403,10 +406,7 @@ function ChatsList({
         onClick={() => setChatsExpanded(!chatsExpanded)}
         className="w-full flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-100 transition"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-        </svg>
-        <span className="flex-1 text-left text-sm font-bold">Chats</span>
+        <span className="flex-1 text-left text-sm font-bold pl-8">Chats</span>
         <svg className={`w-4 h-4 text-slate-400 transition-transform ${chatsExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>

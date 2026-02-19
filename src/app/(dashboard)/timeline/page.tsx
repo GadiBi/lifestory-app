@@ -168,12 +168,12 @@ export default function TimelinePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Toolbar */}
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-3 ml-14">
+      <header className="bg-white border-b border-slate-100 sticky top-14 z-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-3">
               <div>
-                <h1 className="text-xl font-semibold text-slate-900">Your Life Timeline</h1>
+                <h1 className="text-lg font-semibold text-slate-900">Memories</h1>
                 <p className="text-sm text-slate-500">{events.length} events · {totalPhotos} photos</p>
               </div>
             </div>
