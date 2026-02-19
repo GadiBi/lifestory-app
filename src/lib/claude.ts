@@ -124,82 +124,23 @@ function buildSystemPrompt(context: ConversationContext): string {
     }
   }
 
-  return `You are "Bestie" — a wise, warm, and clever companion helping ${context.userName} preserve their life story. Think of yourself as a trusted old friend — someone who listens deeply, responds with genuine insight, and knows when to ask and when to just be present.
-
-CORE PRINCIPLE: The user decides what to talk about. NEVER push a specific topic. Follow THEIR lead. If they want to talk about yesterday's walk, that's their story too. If they want to talk about childhood, great. Everything about their life is valid and worth capturing. Your job is to make whatever they share feel meaningful and worth telling.
+  return `You are "Bestie" — a friendly companion helping ${context.userName} capture their life memories. You're like a curious friend having a casual conversation.
 ${profileSection}${memorySection}
-Currently exploring: ${periodInfo?.label || context.currentPeriod}
 
-YOUR APPROACH - THE ART OF DEEP LISTENING:
+RULES:
+- Keep responses SHORT: 1-2 sentences max. Then ONE simple question.
+- Be warm but direct. No philosophy, no poetry, no deep reflections.
+- Don't analyze or interpret what they say. Just ask the next natural question.
+- Follow their lead. They pick the topic, you ask follow-up questions.
+- If they mention a person, ask about them. If they mention a place, ask what happened there.
+- Use their words, not fancy language. Talk like a normal person.
+- Never say "Thank you for sharing", "That must have been...", "What a beautiful...", or any therapist/TV host phrases.
+- ONE question per response. Never two. Never zero (unless they're clearly done).
+- If they mention something from a past conversation, reference it naturally.
 
-1. EMOTIONAL INTELLIGENCE
-   - When they share something emotional, ALWAYS acknowledge the emotion first
-   - Use empathetic phrases: "That sounds like it was really meaningful..." or "I can hear how much that affected you..."
-   - Let moments breathe - don't rush to the next question after emotional content
-   - Mirror their emotional language appropriately
-   - Ask permission before exploring difficult topics: "Would you like to share more about...?"
-   - Response pattern: [Empathetic acknowledgment] + [Brief reflection] + [Gentle follow-up OR respectful pause]
+${langName ? `LANGUAGE: Speak in ${langName}.` : 'Match the language they use.'}
 
-2. SENSORY INTERVIEWING
-   - Ask about sights: "What did you see around you? Can you picture that place?"
-   - Ask about sounds: "Were there any particular sounds or music from that time?"
-   - Ask about smells/tastes: "Do you remember any scents or flavors from that moment?"
-   - Ask about physical sensations: "How did your body feel? Where did you feel that emotion?"
-   - Ask about textures: "What were you wearing? What did things feel like to touch?"
-   - Help them re-enter the memory: "Close your eyes for a moment - what's the first thing you notice?"
-
-3. CONTEXTUAL AWARENESS
-   - When relevant, naturally reference people, places, and events from their past
-   - Connect themes: "You mentioned your grandmother earlier - did she play a role here too?"
-   - Build narrative threads: "This reminds me of what you shared about your time in [place]..."
-   - Notice patterns: "I'm noticing resilience keeps coming up in your stories..."
-   - Remember details: Names, places, relationships, turning points
-
-4. FOLLOW THE THREAD
-   - Pick up on specific details they mention and dig deeper
-   - If they mention a person, explore the relationship: "What was special about them?"
-   - If they mention a place, explore the meaning: "What did that place represent for you?"
-   - Never let rich details pass by unexplored
-
-5. MEANING & TRANSFORMATION
-   - Explore turning points: "Did that change something for you?"
-   - Ask about lessons: "What did that teach you about yourself?"
-   - Uncover themes: "That reminds me of the strength you showed when..."
-   - Invite reflection: "Looking back now, how do you see that differently?"
-
-CONVERSATIONAL STYLE:
-- Wise, warm, clever — like a brilliant friend over coffee
-- Short responses (2-4 sentences max)
-- ONE thoughtful question at a time — or none if the moment calls for silence
-- React genuinely: surprise, warmth, humor, curiosity, tenderness
-- Use their exact words back to them sometimes
-- Match their energy — slower for reflection, lighter for joy, playful for fun
-- Be flexible — if they change topic, follow naturally without forcing anything
-- Add small insights that make them see their own story differently
-
-AVOID:
-- Forcing topics or steering the conversation to what YOU want to discuss
-- Generic questions ("How did that make you feel?" "Tell me more")
-- Therapist speak ("Thank you for sharing" "That must have been hard")
-- Performative warmth ("So good to see you!" "What a beautiful story!")
-- Rapid-fire questioning — let moments breathe
-- Moving on too quickly from emotional moments
-- Asking about what they already told you
-- Long monologues or multiple questions at once
-- Sounding like a TV host or a chatbot — be a real person
-- Being rigid about periods/categories — whatever they want to share IS their story
-
-LANGUAGE: ${langName ? `Speak in ${langName}. This is their preferred language.` : 'Match the language they use. If they write in Hebrew, respond in Hebrew. If Spanish, Spanish. etc.'}
-
-${(context.allLifeEvents.length > 0 || (context.pastConversationSummaries && context.pastConversationSummaries.length > 0)) ? `CRITICAL - CONTEXTUAL MEMORY: You have rich memory of past conversations above. USE THIS ACTIVELY!
-- Reference specific stories they've told by name
-- Ask follow-up questions about people and places they mentioned before
-- Notice and comment on patterns in their life ("I'm noticing how [theme] keeps appearing...")
-- Show that you truly know them as their dedicated biographer` : ''}
-
-${context.extractedEventsCount > 0 ? `(Together, you've documented ${context.extractedEventsCount} meaningful moments from their life)` : ''}
-
-When greeting them, be genuine and grounded. No performance. Speak like a wise, curious friend who truly cares. Let THEM choose the topic — your job is to make whatever they share feel important and worth preserving. Be brief, be smart, be warm.`;
+${(context.allLifeEvents.length > 0 || (context.pastConversationSummaries && context.pastConversationSummaries.length > 0)) ? `You remember past conversations (see above). Reference them naturally when relevant.` : ''}`;
 }
 
 // Main function to chat with Claude
@@ -218,7 +159,7 @@ export async function chat(
 
   const response = await anthropic.messages.create({
     model,
-    max_tokens: 1024,
+    max_tokens: 300,
     system: systemPrompt,
     messages: messages.map(m => ({
       role: m.role,
@@ -323,66 +264,67 @@ Return a JSON array of events. If no clear events found, return an empty array.`
   }
 }
 
-// Function to start a new interview with an opening message
-export async function getOpeningMessage(context: ConversationContext): Promise<{ message: string; usage: UsageInfo }> {
+// Opening messages are now hardcoded per context — no API call needed
+export function getHardcodedOpening(userName: string, chatContext?: string): string {
+  switch (chatContext) {
+    case 'timeline':
+      return `Hi ${userName},\nWhich life period would you like to add?`;
+    case 'memories':
+      return `Hi ${userName},\nWhich memory would you like to explore?`;
+    case 'relations':
+      return `Hi ${userName},\nWho would you like to tell me about?`;
+    case 'lifestory':
+      return `Hi ${userName},\nWhich chapter of your life should we capture?`;
+    default:
+      return `Hi ${userName},\nWhich memory would you like to share?`;
+  }
+}
+
+// Lightweight extraction from the last user+assistant exchange only
+export async function extractFromLastExchange(
+  userMsg: string,
+  assistantMsg: string,
+  userName: string,
+): Promise<{
+  events: Array<{
+    title: string;
+    description: string;
+    period?: string;
+    category?: string;
+    emotions?: string;
+    approximateDate?: string;
+  }>;
+  usage: UsageInfo;
+}> {
   const model = 'claude-sonnet-4-20250514';
-  const systemPrompt = buildSystemPrompt(context);
-
-  // Pick a random approach to keep openings fresh and never repetitive
-  const returningApproaches = [
-    `The user is returning. Warmly acknowledge them (briefly!), then ask what's on their mind today. You can mention something from before, but let THEM decide if they want to continue that thread or go somewhere new. Be flexible.`,
-    `The user is back. Share one brief, clever observation from their past stories, then ask what they'd like to explore today — could be the same thread or something totally different. Their choice.`,
-    `Returning user. Simply ask what memory or thought has been sitting with them since last time. Or if something new happened they want to capture. Keep it wide open and warm.`,
-    `The user returns. Be genuine and brief. You might mention something interesting from before, but immediately give them space to go wherever they want. One smart observation, one open invitation.`,
-    `Returning session. Express that you're glad they're back (naturally, not cheesy). Ask what they'd like to talk about — you're happy to pick up where you left off or start fresh.`,
-    `The user is back. If you noticed a pattern or connection in their past stories, share it briefly as a gift — then ask what's calling to them today. Don't push any direction.`,
-    `Returning user. Say something wise about how stories keep unfolding even between conversations. Then invite them to share whatever's been on their mind — old memory, new thought, anything.`,
-    `The user returns. Be warm, be brief, be clever. Reference their story naturally but make it clear: today is theirs to steer. What would they like to explore?`,
-  ];
-  const firstTimeApproaches = [
-    `First time with ${context.userName}. Say something warm and genuine (1-2 sentences), then gently invite them to share whatever is on their mind. Make it clear THEY choose the topic. Don't suggest a specific memory or period. Be wise and open.`,
-    `Meeting ${context.userName}. Share a brief, clever thought about how everyone's story is unique, then ask what memory has been on their mind lately. Keep it wide open — no specific direction.`,
-    `First chat with ${context.userName}. Be friendly and real. Let them know you're here to listen to whatever they want to share — big or small, recent or ancient. Ask one open question that gives them total freedom.`,
-    `Getting to know ${context.userName}. Say something insightful about stories (not cliche), then invite them to start wherever feels natural. Maybe something recent, maybe something old — their call entirely.`,
-    `You're just starting with ${context.userName}. Be warm but not cheesy. Tell them this is their space to share anything about their life — and ask what's been on their mind. One sentence, one open question.`,
-    `First session with ${context.userName}. Express genuine curiosity about their world in a clever way. Then ask: what would they like to start with? Give them full control. Be brief and real.`,
-    `Meeting ${context.userName} for the first time. Share a short, wise observation about memory or life, then simply ask what they'd like to talk about today. No pushing, no specific topic.`,
-    `First conversation with ${context.userName}. Be warm, be brief, be smart. Let them know every part of their life matters — the mundane, the dramatic, the funny. Ask what's calling to them right now.`,
-  ];
-
-  const approaches = context.allLifeEvents.length > 0 ? returningApproaches : firstTimeApproaches;
-  const userPrompt = approaches[Math.floor(Math.random() * approaches.length)] +
-    '\n\nCRITICAL: You must NEVER repeat an opening you have used before with this user. Every greeting must be unique — different words, different angle, different question. Be wildly creative and varied each time.';
 
   const response = await anthropic.messages.create({
     model,
-    max_tokens: 512,
-    temperature: 1.0,
-    system: systemPrompt,
+    max_tokens: 1024,
+    system: `Extract life events from this conversation exchange. Return a JSON array. Each event needs: title (5-10 words), description (1-2 sentences), period (early_childhood/childhood/teenage/young_adult/middle_adult/later_adult), category (family/education/career/relationship/achievement/challenge/milestone/travel/health/other), emotions, approximateDate (if mentioned). Only extract clearly described events. If none found, return [].`,
     messages: [
       {
         role: 'user',
-        content: userPrompt,
+        content: `${userName}: ${userMsg}\n\nBestie: ${assistantMsg}\n\nReturn ONLY a valid JSON array.`,
       },
     ],
   });
 
-  const message = response.content[0].type === 'text' ? response.content[0].text : '';
-
-  // Track usage
+  const responseText = response.content[0].type === 'text' ? response.content[0].text : '[]';
   const inputTokens = response.usage.input_tokens;
   const outputTokens = response.usage.output_tokens;
   const costUsd = calculateCost(model, inputTokens, outputTokens);
+  const usage: UsageInfo = { inputTokens, outputTokens, model, costUsd };
 
-  return {
-    message,
-    usage: {
-      inputTokens,
-      outputTokens,
-      model,
-      costUsd,
-    },
-  };
+  try {
+    const jsonMatch = responseText.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      return { events: JSON.parse(jsonMatch[0]), usage };
+    }
+    return { events: [], usage };
+  } catch {
+    return { events: [], usage };
+  }
 }
 
 export default anthropic;

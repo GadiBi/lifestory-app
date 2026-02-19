@@ -65,6 +65,22 @@ const excludeWords = new Set([
   'Temple', 'High', 'Middle', 'College', 'University', 'Hospital',
   'Summer', 'Winter', 'Spring', 'Fall', 'Autumn', 'Christmas', 'Easter',
   'Passover', 'Thank', 'Sorry', 'Please', 'Hello', 'Welcome',
+  // Life periods & timeline terms
+  'Childhood', 'Teenage', 'Adulthood', 'Youth', 'Retirement', 'Period',
+  'Timeline', 'Milestone', 'Achievement', 'Challenge', 'Career', 'Education',
+  'Relationship', 'Travel', 'Health', 'Birthday', 'Anniversary', 'Graduation',
+  'Wedding', 'Funeral', 'Holiday', 'Vacation', 'Trip', 'Journey', 'Adventure',
+  // Common place names
+  'Jerusalem', 'Aviv', 'Haifa', 'York', 'London', 'Paris', 'Berlin',
+  'Moscow', 'Tokyo', 'Beijing', 'Sydney', 'Toronto', 'Chicago', 'Miami',
+  'Angeles', 'Francisco', 'Diego', 'Vegas', 'Hollywood', 'Brooklyn',
+  'Manhattan', 'Queens', 'Bronx', 'Boston', 'Washington', 'Philadelphia',
+  // Abstract concepts
+  'Love', 'Hope', 'Faith', 'Joy', 'Fear', 'Anger', 'Grief', 'Pride',
+  'Happiness', 'Sadness', 'Freedom', 'Success', 'Failure', 'Strength',
+  'Courage', 'Wisdom', 'Truth', 'Beauty', 'Justice', 'Mercy',
+  // AI/app terms
+  'Bestie', 'Chat', 'Interview', 'Extract', 'Event', 'Events',
 ]);
 
 // Only accept a proper noun as a person name if it appears near a person-context word

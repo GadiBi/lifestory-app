@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { chat, getOpeningMessage, type Message, type LifePeriod, type LifeEventSummary, type UsageInfo } from '@/lib/claude';
+import { chat, extractFromLastExchange, type Message, type LifePeriod, type LifeEventSummary, type UsageInfo } from '@/lib/claude';
 import { validateStringLength } from '@/lib/validation';
 
 // Helper to save API usage
@@ -107,8 +107,8 @@ export async function GET() {
 
     // Filter out chats with no user messages (empty chats)
     const nonEmptyInterviews = interviewsWithPreview.filter(i => {
-      // Keep chats that have at least one user message (messageCount > 1 means has user + assistant)
-      return i.messageCount > 1 || i.preview !== '';
+      // Keep chats that have a preview (meaning at least one user message was found)
+      return i.preview !== '';
     });
 
     return NextResponse.json({ interviews: nonEmptyInterviews });
@@ -127,7 +127,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { interviewId, message, startNew } = await request.json();
+    const { interviewId, message, startNew, saveOpening, chatContext } = await request.json();
 
     // Validate message length
     if (message) {
@@ -351,13 +351,23 @@ export async function POST(request: Request) {
     let response: string;
     let updatedMessages: Message[];
 
-    if (!message && previousMessages.length === 0) {
-      // Starting fresh - get opening message
-      const openingResult = await getOpeningMessage(context);
-      response = openingResult.message;
-      updatedMessages = [{ role: 'assistant', content: response }];
-      // Save usage
-      await saveUsage(session.user.id, openingResult.usage, 'opening');
+    if (saveOpening && interviewId) {
+      // Client-side hardcoded opening — just save it to the conversation log
+      updatedMessages = [{ role: 'assistant' as const, content: saveOpening }];
+      await prisma.interview.update({
+        where: { id: interview.id },
+        data: { conversationLog: JSON.stringify(updatedMessages) },
+      });
+      return NextResponse.json({
+        interview: { id: interview.id, currentPeriod: interview.currentPeriod, status: interview.status },
+        messages: updatedMessages,
+      });
+    } else if (!message && previousMessages.length === 0) {
+      // Starting fresh with no message — return empty (opening is handled client-side now)
+      return NextResponse.json({
+        interview: { id: interview.id, currentPeriod: interview.currentPeriod, status: interview.status },
+        messages: [],
+      });
     } else if (message) {
       // Continue conversation
       const result = await chat(message, context);
@@ -387,6 +397,36 @@ export async function POST(request: Request) {
       },
     });
 
+    // Auto-extract life events from the last exchange (fire and forget — don't block response)
+    if (message && response) {
+      extractFromLastExchange(message, response, userName)
+        .then(async (result) => {
+          if (result.events.length > 0) {
+            for (const event of result.events) {
+              try {
+                await prisma.lifeEvent.create({
+                  data: {
+                    userId: session.user.id,
+                    interviewId: interview.id,
+                    title: event.title,
+                    description: event.description || '',
+                    period: event.period || interview.currentPeriod,
+                    category: event.category || null,
+                    emotions: event.emotions || null,
+                    date: event.approximateDate ? tryParseDate(event.approximateDate) : null,
+                  },
+                });
+              } catch (e) {
+                console.error('Failed to save extracted event:', e);
+              }
+            }
+            // Save extraction usage
+            await saveUsage(session.user.id, result.usage, 'auto-extract');
+          }
+        })
+        .catch((err) => console.error('Auto-extraction failed:', err));
+    }
+
     return NextResponse.json({
       interview: {
         id: interview.id,
@@ -402,5 +442,19 @@ export async function POST(request: Request) {
       { error: 'Failed to process chat message' },
       { status: 500 }
     );
+  }
+}
+
+// Helper to parse vague dates
+function tryParseDate(dateStr: string): Date | null {
+  try {
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) return d;
+    // Try year-only
+    const yearMatch = dateStr.match(/\b(19|20)\d{2}\b/);
+    if (yearMatch) return new Date(parseInt(yearMatch[0]), 0, 1);
+    return null;
+  } catch {
+    return null;
   }
 }
