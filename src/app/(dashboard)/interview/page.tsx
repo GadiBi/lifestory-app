@@ -549,17 +549,11 @@ export default function InterviewPage() {
     );
   }
 
-  // Subtle loading — same layout shape, no jumping
-  if (initializing) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col">
-        <main className="flex-1" />
-      </div>
-    );
-  }
+  // While initializing, render the same shell as normal — no blank page that causes jump
+  // The showLanding / messages content will appear once ready
 
-  // Landing page (New Chat)
-  const showLanding = showNewChat && messages.length === 0;
+  // Landing page (New Chat) — also show during initializing to prevent blank page jump
+  const showLanding = (showNewChat || initializing) && messages.length === 0;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">

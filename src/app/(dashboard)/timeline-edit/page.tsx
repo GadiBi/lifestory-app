@@ -240,12 +240,12 @@ export default function TimelineEditPage() {
               </svg>
             </div>
             <p className="text-slate-600 mb-2">Your timeline is empty</p>
-            <p className="text-sm text-slate-400 mb-6">Add entries manually or chat with Bestie to build your timeline</p>
+            <p className="text-sm text-slate-400 mb-6">Start a conversation with Bestie and your timeline will be built automatically</p>
             <button
-              onClick={() => { resetForm(); setShowForm(true); }}
+              onClick={() => router.push('/interview?new=true')}
               className="px-5 py-2.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition font-medium"
             >
-              Add your first entry
+              Start a conversation
             </button>
           </div>
         ) : (
