@@ -164,12 +164,12 @@ export default function PeoplePage() {
               </svg>
             </div>
             <h2 className="text-lg font-semibold text-slate-900 mb-2">No people found yet</h2>
-            <p className="text-slate-500 mb-6">Start sharing your life story and the people you mention will appear here.</p>
+            <p className="text-slate-500 mb-6">Tell Bestie about the people in your life and they will appear here.</p>
             <Link
-              href="/interview?new=true"
+              href="/interview?new=true&context=relations"
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg transition font-medium"
             >
-              Begin a Conversation
+              Start a conversation
             </Link>
           </div>
         ) : (

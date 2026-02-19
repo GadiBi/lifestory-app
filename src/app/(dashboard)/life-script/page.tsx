@@ -471,7 +471,7 @@ ${divider}
 
             {!stats?.canGenerate && (
               <p className="text-center text-sm text-slate-500 mt-4">
-                <Link href="/interview" className="text-primary hover:underline">Start a conversation</Link> to add more memories to your story
+                <Link href="/interview?new=true&context=lifestory" className="text-primary hover:underline">Start a conversation</Link> to add more memories to your story
               </p>
             )}
           </div>

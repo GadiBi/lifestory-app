@@ -105,7 +105,11 @@ export default function InterviewPage() {
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Only auto-scroll after user has sent a message (not on initial opening)
+    const hasUserMessage = messages.some(m => m.role === 'user');
+    if (hasUserMessage) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   // Track accumulated transcript across recognition restarts
