@@ -7,11 +7,12 @@ import Link from 'next/link';
 interface HeaderProps {
   onToggleSidebar: () => void;
   chatTitle?: string | null;
+  pageTitle?: string | null;
   sidebarExpanded?: boolean;
   isMobile?: boolean;
 }
 
-export default function Header({ onToggleSidebar, chatTitle, sidebarExpanded, isMobile }: HeaderProps) {
+export default function Header({ onToggleSidebar, chatTitle, pageTitle, sidebarExpanded, isMobile }: HeaderProps) {
   const { data: session } = useSession();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -80,11 +81,11 @@ export default function Header({ onToggleSidebar, chatTitle, sidebarExpanded, is
         </Link>
       )}
 
-      {/* Center: chat title */}
+      {/* Center: page title or chat title */}
       <div className="flex-1 text-center min-w-0">
-        {chatTitle && chatTitle !== 'New Chat' && (
-          <span className="text-sm text-slate-500 font-medium truncate">
-            {chatTitle}
+        {(pageTitle || (chatTitle && chatTitle !== 'New Chat')) && (
+          <span className="text-sm text-slate-600 font-semibold truncate">
+            {pageTitle || chatTitle}
           </span>
         )}
       </div>

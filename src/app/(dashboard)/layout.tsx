@@ -1,13 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 
+const PAGE_TITLES: Record<string, string> = {
+  '/timeline': 'Memories',
+  '/timeline-edit': 'Timeline',
+  '/people': 'Relations',
+  '/life-script': 'Life Story',
+};
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [chatTitle, setChatTitle] = useState<string | null>(null);
+
+  const pageTitle = PAGE_TITLES[pathname] ?? null;
 
   useEffect(() => {
     function checkMobile() {
@@ -42,6 +53,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Header
         onToggleSidebar={toggleSidebar}
         chatTitle={chatTitle}
+        pageTitle={pageTitle}
         sidebarExpanded={sidebarExpanded}
         isMobile={isMobile}
       />

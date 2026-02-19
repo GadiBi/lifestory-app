@@ -45,7 +45,7 @@ export default function TimelineEditPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) { router.push('/login'); return; }
-    fetchEntries();
+    syncAndFetch();
   }, [session, status, router]);
 
   async function fetchEntries() {
@@ -58,6 +58,11 @@ export default function TimelineEditPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function syncAndFetch() {
+    try { await fetch('/api/interview/extract-all', { method: 'POST' }); } catch {}
+    await fetchEntries();
   }
 
   function resetForm() {
@@ -149,8 +154,7 @@ export default function TimelineEditPage() {
     <div className="min-h-screen bg-white">
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-12">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-semibold text-slate-900">Timeline</h1>
+        <div className="mb-6">
           <button
             onClick={() => { resetForm(); setShowForm(true); }}
             className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition font-medium"
@@ -158,7 +162,7 @@ export default function TimelineEditPage() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Add Entry
+            Add Entry manually
           </button>
         </div>
 

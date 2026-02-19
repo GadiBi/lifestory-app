@@ -94,7 +94,7 @@ export default function WelcomePage() {
                   <button
                     key={chat.id}
                     onClick={() => router.push(`/interview?id=${chat.id}`)}
-                    className="px-5 py-3 text-base text-primary bg-primary/5 border border-primary/15 rounded-full hover:bg-primary/10 transition truncate text-left"
+                    className="px-5 py-3 text-base text-primary bg-primary/5 border border-primary/15 rounded-full hover:bg-primary/10 transition truncate text-center"
                   >
                     {chat.title}
                   </button>

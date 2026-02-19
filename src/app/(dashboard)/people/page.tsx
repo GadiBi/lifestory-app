@@ -90,11 +90,6 @@ export default function PeoplePage() {
   return (
     <div className="min-h-screen bg-white">
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-12">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-semibold text-slate-900">Relations</h1>
-        </div>
-
         {/* Add Person Button & Form */}
         <div className="mb-6">
           {!showAddForm ? (
@@ -105,7 +100,7 @@ export default function PeoplePage() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Add Person
+              Add Person manually
             </button>
           ) : (
             <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">

@@ -67,7 +67,7 @@ export default function TimelinePage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) { router.push('/login'); return; }
-    fetchEvents();
+    syncAndFetch();
   }, [session, status, router, filterPeriod, filterCategory]);
 
   async function fetchEvents() {
@@ -84,6 +84,11 @@ export default function TimelinePage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function syncAndFetch() {
+    try { await fetch('/api/interview/extract-all', { method: 'POST' }); } catch {}
+    await fetchEvents();
   }
 
   async function deleteEvent(eventId: string) {
@@ -170,24 +175,10 @@ export default function TimelinePage() {
       {/* Toolbar */}
       <header className="bg-white border-b border-slate-100 sticky top-14 z-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div>
-                <h1 className="text-lg font-semibold text-slate-900">Memories</h1>
-                <p className="text-sm text-slate-500">{events.length} events · {totalPhotos} photos</p>
-              </div>
-            </div>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-slate-500">{events.length} events · {totalPhotos} photos</p>
 
-            <div className="flex items-center gap-2 flex-wrap">
-              <button
-                onClick={() => setShowAddForm(!showAddForm)}
-                className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition font-medium"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Add Memory
-              </button>
+            <div className="flex flex-col items-end gap-2">
               <div className="flex bg-slate-100 rounded-lg p-1">
                 <button
                   onClick={() => setViewMode('timeline')}
@@ -210,7 +201,15 @@ export default function TimelinePage() {
                   </svg>
                 </button>
               </div>
-
+              <button
+                onClick={() => setShowAddForm(!showAddForm)}
+                className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition font-medium"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Add Memory manually
+              </button>
             </div>
           </div>
         </div>
