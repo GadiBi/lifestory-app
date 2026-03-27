@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { PersonSchema, validate } from '@/lib/schemas';
 
 // Relationship patterns to detect in text
 const relationshipPatterns: [RegExp, string][] = [
@@ -104,16 +105,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, relationship } = await request.json();
-    if (!name || !name.trim()) {
-      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    const body = await request.json();
+    const parsed = validate(PersonSchema, body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
 
     const person = await prisma.person.create({
       data: {
         userId: session.user.id,
-        name: name.trim(),
-        relationship: relationship || 'Person',
+        name: parsed.data.name,
+        relationship: parsed.data.relationship,
       },
     });
 

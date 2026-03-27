@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-
 import Image from 'next/image';
+import ErrorBanner from '@/components/ErrorBanner';
 
 interface LifeEvent {
   id: string;
@@ -37,6 +37,7 @@ export default function UploadPage() {
   const [selectedEvent, setSelectedEvent] = useState<string>('');
   const [viewingMedia, setViewingMedia] = useState<MediaItem | null>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -53,12 +54,13 @@ export default function UploadPage() {
         fetch('/api/media'),
         fetch('/api/events'),
       ]);
+      if (!mediaRes.ok) throw new Error(`Failed to load photos: ${mediaRes.status}`);
       const mediaData = await mediaRes.json();
-      const eventsData = await eventsRes.json();
+      const eventsData = eventsRes.ok ? await eventsRes.json() : { events: [] };
       setMedia(mediaData.media || []);
       setLifeEvents(eventsData.events || []);
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load photos');
     } finally {
       setLoading(false);
     }
@@ -101,9 +103,12 @@ export default function UploadPage() {
         if (response.ok) {
           const data = await response.json();
           setMedia(prev => [data.media, ...prev]);
+        } else {
+          const data = await response.json().catch(() => ({}));
+          setError(data.error || `Upload failed for ${file.name}: ${response.status}`);
         }
-      } catch (error) {
-        console.error('Upload failed:', error);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : `Upload failed for ${file.name}`);
       }
 
       uploaded++;
@@ -120,14 +125,19 @@ export default function UploadPage() {
   async function handleDelete(id: string) {
     if (!confirm('Delete this photo?')) return;
 
+    // Optimistic update
+    setMedia(prev => prev.filter(m => m.id !== id));
+    setViewingMedia(null);
+
     try {
       const response = await fetch(`/api/media?id=${id}`, { method: 'DELETE' });
-      if (response.ok) {
-        setMedia(prev => prev.filter(m => m.id !== id));
-        setViewingMedia(null);
+      if (!response.ok) {
+        setError(`Failed to delete photo: ${response.status}`);
+        fetchData(); // revert
       }
-    } catch (error) {
-      console.error('Delete failed:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete photo');
+      fetchData(); // revert
     }
   }
 
@@ -171,6 +181,11 @@ export default function UploadPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {error && (
+          <div className="mb-4">
+            <ErrorBanner message={error} onDismiss={() => setError(null)} />
+          </div>
+        )}
         {/* Upload Area */}
         <div
           onDragEnter={handleDrag}

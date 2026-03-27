@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import ErrorBanner from '@/components/ErrorBanner';
 
 interface LifeEvent {
   id: string;
@@ -46,6 +47,7 @@ export default function SearchPage() {
   const [conversations, setConversations] = useState<ConversationMatch[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const performSearch = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) {
@@ -57,20 +59,17 @@ export default function SearchPage() {
 
     setLoading(true);
     setSearched(true);
+    setError(null);
 
     try {
-      const params = new URLSearchParams({
-        q: searchQuery,
-        type: 'all',
-      });
-
+      const params = new URLSearchParams({ q: searchQuery, type: 'all' });
       const response = await fetch(`/api/search?${params}`);
+      if (!response.ok) throw new Error(`Search failed: ${response.status}`);
       const data = await response.json();
-
       setEvents(data.events || []);
       setConversations(data.conversations || []);
-    } catch (error) {
-      console.error('Search failed:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Search failed');
     } finally {
       setLoading(false);
     }
@@ -164,6 +163,11 @@ export default function SearchPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+        {error && (
+          <div className="mb-4">
+            <ErrorBanner message={error} onDismiss={() => setError(null)} />
+          </div>
+        )}
         {searched && !loading && (
           <p className="text-sm text-slate-500 mb-4">
             {totalResults === 0

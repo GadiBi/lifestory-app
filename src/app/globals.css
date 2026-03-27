@@ -15,8 +15,8 @@
   --primary-dark: var(--color-primary-dark);
   --primary-light: var(--color-primary-light);
 
-  /* Font family - can be overridden by ThemeContext */
-  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  /* Font family - Inter for Latin, Heebo for Hebrew */
+  --font-family: var(--font-inter), var(--font-heebo), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   /* Neutral colors */
   --slate-50: #F8FAFC;
@@ -40,8 +40,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter), var(--font-heebo), sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
 
   /* Professional color palette for Tailwind - uses CSS variables for theming */
   --color-primary: var(--color-primary);
@@ -67,6 +67,24 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-family), var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Float animation for hero mockup elements */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-10px) rotate(0.5deg); }
+  66% { transform: translateY(-6px) rotate(-0.5deg); }
+}
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+@keyframes float-delayed {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+.animate-float-delayed {
+  animation: float-delayed 4s ease-in-out infinite 1.5s;
 }
 
 /* Toast animation */

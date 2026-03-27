@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import ErrorBanner from '@/components/ErrorBanner';
 
 interface Profile {
   fullName: string | null;
@@ -43,6 +44,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [username, setUsername] = useState('');
   const [fullName, setFullName] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -62,8 +64,9 @@ export default function ProfilePage() {
         fetch('/api/profile'),
         fetch('/api/usage'),
       ]);
+      if (!profileRes.ok) throw new Error(`Failed to load profile: ${profileRes.status}`);
       const profileData = await profileRes.json();
-      const usageData = await usageRes.json();
+      const usageData = usageRes.ok ? await usageRes.json() : null;
 
       setUserData(profileData);
       setUsage(usageData);
@@ -72,8 +75,8 @@ export default function ProfilePage() {
       setBirthDate(profileData.profile?.birthDate ? profileData.profile.birthDate.split('T')[0] : '');
       setBirthPlace(profileData.profile?.birthPlace || '');
       setLanguage(profileData.profile?.language || 'en');
-    } catch (error) {
-      console.error('Failed to fetch:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load profile');
     } finally {
       setLoading(false);
     }
@@ -84,6 +87,7 @@ export default function ProfilePage() {
     setSaving(true);
     setSuccess(false);
     setUsernameError('');
+    setError(null);
 
     try {
       const response = await fetch('/api/profile', {
@@ -97,9 +101,11 @@ export default function ProfilePage() {
         setTimeout(() => setSuccess(false), 3000);
       } else if (data.error === 'Username already taken') {
         setUsernameError('Username taken');
+      } else {
+        setError(data.error || `Failed to save: ${response.status}`);
       }
-    } catch (error) {
-      console.error('Failed to update:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save profile');
     } finally {
       setSaving(false);
     }
@@ -118,6 +124,7 @@ export default function ProfilePage() {
         {/* Profile Form */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
           <h2 className="text-lg font-semibold text-slate-900 mb-4">Personal Information</h2>
+          {error && <div className="mb-4"><ErrorBanner message={error} onDismiss={() => setError(null)} /></div>}
           {success && <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">Saved successfully!</div>}
 
           <form onSubmit={handleSubmit} className="space-y-4">

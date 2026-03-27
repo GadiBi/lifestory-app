@@ -205,6 +205,7 @@ export async function extractLifeEvents(
     category?: string;
     emotions?: string;
     approximateDate?: string;
+    approximateEndDate?: string;
   }>;
   usage: UsageInfo;
 }> {
@@ -225,7 +226,8 @@ For each event, extract:
 - period: The life period (early_childhood, childhood, teenage, young_adult, middle_adult, later_adult)
 - category: One of: family, education, career, relationship, achievement, challenge, milestone, travel, health, other
 - emotions: Key emotions associated with this event
-- approximateDate: Any date/year mentioned or inferred (can be vague like "summer 1995" or "early teens")
+- approximateDate: Start date/year mentioned or inferred (can be vague like "summer 1995" or "early teens")
+- approximateEndDate: End date/year if this event spans a period (e.g. "worked there for 5 years" → endDate is start+5yr). Leave null for one-time events.
 
 Only extract events that are clearly described with enough detail. Skip vague mentions.
 Return a JSON array of events. If no clear events found, return an empty array.`,
@@ -293,6 +295,7 @@ export async function extractFromLastExchange(
     category?: string;
     emotions?: string;
     approximateDate?: string;
+    approximateEndDate?: string;
   }>;
   usage: UsageInfo;
 }> {
@@ -301,7 +304,7 @@ export async function extractFromLastExchange(
   const response = await anthropic.messages.create({
     model,
     max_tokens: 1024,
-    system: `Extract life events from this conversation exchange. Return a JSON array. Each event needs: title (5-10 words), description (1-2 sentences), period (early_childhood/childhood/teenage/young_adult/middle_adult/later_adult), category (family/education/career/relationship/achievement/challenge/milestone/travel/health/other), emotions, approximateDate (if mentioned). Only extract clearly described events. If none found, return [].`,
+    system: `Extract life events from this conversation exchange. Return a JSON array. Each event needs: title (5-10 words), description (1-2 sentences), period (early_childhood/childhood/teenage/young_adult/middle_adult/later_adult), category (family/education/career/relationship/achievement/challenge/milestone/travel/health/other), emotions, approximateDate (start date if mentioned), approximateEndDate (end date if this spans a period, e.g. "worked there 3 years" → add endDate; null for one-time events). Only extract clearly described events. If none found, return [].`,
     messages: [
       {
         role: 'user',

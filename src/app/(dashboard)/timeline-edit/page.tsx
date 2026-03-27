@@ -9,6 +9,7 @@ interface TimelineEntry {
   title: string;
   description: string;
   date: string | null;
+  endDate: string | null;
   period: string | null;
   category: string | null;
   emotions: string | null;
@@ -27,6 +28,14 @@ const CATEGORIES = [
   { id: 'other', label: 'Other' },
 ];
 
+function formatDate(date: string | null, endDate: string | null): string {
+  if (!date) return '';
+  const start = new Date(date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  if (!endDate) return start;
+  const end = new Date(endDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  return `${start} – ${end}`;
+}
+
 export default function TimelineEditPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -40,6 +49,7 @@ export default function TimelineEditPage() {
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formDate, setFormDate] = useState('');
+  const [formEndDate, setFormEndDate] = useState('');
   const [formCategory, setFormCategory] = useState('');
 
   useEffect(() => {
@@ -69,6 +79,7 @@ export default function TimelineEditPage() {
     setFormTitle('');
     setFormDescription('');
     setFormDate('');
+    setFormEndDate('');
     setFormCategory('');
     setEditingId(null);
     setShowForm(false);
@@ -78,6 +89,7 @@ export default function TimelineEditPage() {
     setFormTitle(entry.title);
     setFormDescription(entry.description || '');
     setFormDate(entry.date ? entry.date.slice(0, 10) : '');
+    setFormEndDate(entry.endDate ? entry.endDate.slice(0, 10) : '');
     setFormCategory(entry.category || '');
     setEditingId(entry.id);
     setShowForm(true);
@@ -91,31 +103,24 @@ export default function TimelineEditPage() {
         title: formTitle.trim(),
         description: formDescription.trim(),
         category: formCategory || null,
+        date: formDate ? new Date(formDate).toISOString() : null,
+        endDate: formEndDate ? new Date(formEndDate).toISOString() : null,
       };
-      if (formDate) body.date = new Date(formDate).toISOString();
 
       if (editingId) {
-        // Update existing
         const res = await fetch(`/api/events/${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         });
-        if (res.ok) {
-          await fetchEntries();
-          resetForm();
-        }
+        if (res.ok) { await fetchEntries(); resetForm(); }
       } else {
-        // Create new
         const res = await fetch('/api/events', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         });
-        if (res.ok) {
-          await fetchEntries();
-          resetForm();
-        }
+        if (res.ok) { await fetchEntries(); resetForm(); }
       }
     } catch (error) {
       console.error('Failed to save:', error);
@@ -134,7 +139,6 @@ export default function TimelineEditPage() {
     }
   }
 
-  // Sort entries by date (newest first), undated at the end
   const sortedEntries = [...entries].sort((a, b) => {
     if (!a.date && !b.date) return 0;
     if (!a.date) return 1;
@@ -188,29 +192,38 @@ export default function TimelineEditPage() {
                 rows={3}
                 className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm resize-none"
               />
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <label className="block text-xs text-slate-500 mb-1">Date</label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">Start Date</label>
                   <input
-                    type="date"
-                    value={formDate}
-                    onChange={(e) => setFormDate(e.target.value)}
+                    type="month"
+                    value={formDate ? formDate.slice(0, 7) : ''}
+                    onChange={(e) => setFormDate(e.target.value ? `${e.target.value}-01` : '')}
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
                   />
                 </div>
-                <div className="flex-1">
-                  <label className="block text-xs text-slate-500 mb-1">Category</label>
-                  <select
-                    value={formCategory}
-                    onChange={(e) => setFormCategory(e.target.value)}
+                <div>
+                  <label className="block text-xs text-slate-500 mb-1">End Date <span className="text-slate-400">(optional)</span></label>
+                  <input
+                    type="month"
+                    value={formEndDate ? formEndDate.slice(0, 7) : ''}
+                    onChange={(e) => setFormEndDate(e.target.value ? `${e.target.value}-01` : '')}
                     className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
-                  >
-                    <option value="">Select...</option>
-                    {CATEGORIES.map(c => (
-                      <option key={c.id} value={c.id}>{c.label}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Category</label>
+                <select
+                  value={formCategory}
+                  onChange={(e) => setFormCategory(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+                >
+                  <option value="">Select...</option>
+                  {CATEGORIES.map(c => (
+                    <option key={c.id} value={c.id}>{c.label}</option>
+                  ))}
+                </select>
               </div>
               <div className="flex items-center gap-2 pt-1">
                 <button
@@ -284,6 +297,7 @@ export default function TimelineEditPage() {
             <div className="space-y-4">
               {sortedEntries.map((entry) => {
                 const cat = CATEGORIES.find(c => c.id === entry.category);
+                const dateDisplay = formatDate(entry.date, entry.endDate);
                 return (
                   <div key={entry.id} className="relative pl-12">
                     {/* Dot */}
@@ -297,9 +311,9 @@ export default function TimelineEditPage() {
                             <p className="text-sm text-slate-600 mt-1 leading-relaxed">{entry.description}</p>
                           )}
                           <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
-                            {entry.date && (
+                            {dateDisplay && (
                               <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md">
-                                {new Date(entry.date).toLocaleDateString()}
+                                {dateDisplay}
                               </span>
                             )}
                             {cat && (

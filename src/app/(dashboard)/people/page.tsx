@@ -4,68 +4,33 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-
-interface PersonMention {
-  type: 'event' | 'conversation';
-  id: string;
-  title: string;
-}
-
-interface Person {
-  name: string;
-  relationship: string;
-  mentions: PersonMention[];
-}
+import { usePeople } from '@/hooks/usePeople';
+import ErrorBanner from '@/components/ErrorBanner';
 
 export default function PeoplePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [people, setPeople] = useState<Person[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { people, loading, error, saving, addPerson, reload } = usePeople();
   const [showAddForm, setShowAddForm] = useState(false);
   const [newPersonName, setNewPersonName] = useState('');
-  const [newPersonRelationship, setNewPersonRelationship] = useState('Person');
-  const [addingPerson, setAddingPerson] = useState(false);
-
-  function fetchPeople() {
-    fetch('/api/people')
-      .then(res => res.json())
-      .then(data => {
-        setPeople(data.people || []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }
+  const [newPersonRelationship, setNewPersonRelationship] = useState<string>('Person');
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === 'loading') return;
-    if (!session) {
-      router.push('/login');
-      return;
-    }
-    fetchPeople();
+    if (!session) router.push('/login');
   }, [session, status, router]);
 
-  async function addPerson() {
+  async function handleAddPerson() {
     if (!newPersonName.trim()) return;
-    setAddingPerson(true);
-    try {
-      const res = await fetch('/api/people', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newPersonName.trim(), relationship: newPersonRelationship }),
-      });
-      if (res.ok) {
-        setNewPersonName('');
-        setNewPersonRelationship('Person');
-        setShowAddForm(false);
-        setLoading(true);
-        fetchPeople();
-      }
-    } catch (error) {
-      console.error('Failed to add person:', error);
-    } finally {
-      setAddingPerson(false);
+    setFormError(null);
+    const ok = await addPerson({ name: newPersonName.trim(), relationship: newPersonRelationship as never });
+    if (ok) {
+      setNewPersonName('');
+      setNewPersonRelationship('Person');
+      setShowAddForm(false);
+    } else {
+      setFormError('Failed to add person. Please try again.');
     }
   }
 
@@ -90,6 +55,13 @@ export default function PeoplePage() {
   return (
     <div className="min-h-screen bg-white">
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-12">
+
+        {error && (
+          <div className="mb-4">
+            <ErrorBanner message={error} onDismiss={reload} />
+          </div>
+        )}
+
         {/* Add Person Button & Form */}
         <div className="mb-6">
           {!showAddForm ? (
@@ -103,55 +75,63 @@ export default function PeoplePage() {
               Add Person manually
             </button>
           ) : (
-            <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">
-              <input
-                type="text"
-                value={newPersonName}
-                onChange={(e) => setNewPersonName(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') addPerson(); }}
-                placeholder="Name..."
-                className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                autoFocus
-              />
-              <select
-                value={newPersonRelationship}
-                onChange={(e) => setNewPersonRelationship(e.target.value)}
-                className="px-3 py-2.5 border border-slate-200 rounded-lg bg-white text-slate-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
-              >
-                <option value="Person">Person</option>
-                <option value="Mother">Mother</option>
-                <option value="Father">Father</option>
-                <option value="Brother">Brother</option>
-                <option value="Sister">Sister</option>
-                <option value="Wife">Wife</option>
-                <option value="Husband">Husband</option>
-                <option value="Son">Son</option>
-                <option value="Daughter">Daughter</option>
-                <option value="Grandmother">Grandmother</option>
-                <option value="Grandfather">Grandfather</option>
-                <option value="Uncle">Uncle</option>
-                <option value="Aunt">Aunt</option>
-                <option value="Cousin">Cousin</option>
-                <option value="Friend">Friend</option>
-                <option value="Teacher/Mentor">Teacher/Mentor</option>
-                <option value="Colleague">Colleague</option>
-                <option value="Neighbor">Neighbor</option>
-              </select>
-              <button
-                onClick={addPerson}
-                disabled={addingPerson || !newPersonName.trim()}
-                className="px-4 py-2.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition font-medium disabled:opacity-50"
-              >
-                {addingPerson ? 'Adding...' : 'Add'}
-              </button>
-              <button
-                onClick={() => { setShowAddForm(false); setNewPersonName(''); }}
-                className="p-2 text-slate-400 hover:text-slate-600"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+            <div className="flex flex-col gap-3 p-4 bg-slate-50 rounded-xl">
+              {formError && <ErrorBanner message={formError} onDismiss={() => setFormError(null)} />}
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  value={newPersonName}
+                  onChange={(e) => setNewPersonName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleAddPerson(); }}
+                  placeholder="Name..."
+                  className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                  autoFocus
+                />
+                <select
+                  value={newPersonRelationship}
+                  onChange={(e) => setNewPersonRelationship(e.target.value)}
+                  className="px-3 py-2.5 border border-slate-200 rounded-lg bg-white text-slate-700 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-sm"
+                >
+                  <option value="Person">Person</option>
+                  <option value="Mother">Mother</option>
+                  <option value="Father">Father</option>
+                  <option value="Brother">Brother</option>
+                  <option value="Sister">Sister</option>
+                  <option value="Wife">Wife</option>
+                  <option value="Husband">Husband</option>
+                  <option value="Son">Son</option>
+                  <option value="Daughter">Daughter</option>
+                  <option value="Grandmother">Grandmother</option>
+                  <option value="Grandfather">Grandfather</option>
+                  <option value="Uncle">Uncle</option>
+                  <option value="Aunt">Aunt</option>
+                  <option value="Cousin">Cousin</option>
+                  <option value="Friend">Friend</option>
+                  <option value="Teacher/Mentor">Teacher/Mentor</option>
+                  <option value="Colleague">Colleague</option>
+                  <option value="Neighbor">Neighbor</option>
+                </select>
+                <button
+                  onClick={handleAddPerson}
+                  disabled={saving || !newPersonName.trim()}
+                  className="px-4 py-2.5 bg-primary text-white text-sm rounded-lg hover:bg-primary-dark transition font-medium disabled:opacity-50 min-w-[80px]"
+                >
+                  {saving ? (
+                    <span className="flex items-center gap-1.5 justify-center">
+                      <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Saving
+                    </span>
+                  ) : 'Add'}
+                </button>
+                <button
+                  onClick={() => { setShowAddForm(false); setNewPersonName(''); setFormError(null); }}
+                  className="p-2 text-slate-400 hover:text-slate-600"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -191,6 +171,18 @@ export default function PeoplePage() {
       </main>
     </div>
   );
+}
+
+interface PersonMention {
+  type: 'event' | 'conversation';
+  id: string;
+  title: string;
+}
+
+interface Person {
+  name: string;
+  relationship: string;
+  mentions: PersonMention[];
 }
 
 function PeopleSection({ title, people }: { title: string; people: Person[] }) {
@@ -237,7 +229,6 @@ function PersonCard({ person }: { person: Person }) {
         )}
       </div>
 
-      {/* Links to relevant conversations */}
       {convMentions.length > 0 && (
         <div className="mt-3 pt-3 border-t border-primary/10 space-y-1">
           {convMentions.slice(0, 3).map((mention) => (

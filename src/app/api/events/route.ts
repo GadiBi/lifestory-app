@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { validateStringLength } from '@/lib/validation';
+import { LifeEventSchema, validate } from '@/lib/schemas';
 
 // GET /api/events - List all events for current user
 export async function GET(request: Request) {
@@ -55,32 +55,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { title, description, date, period, category, emotions, interviewId } = await request.json();
-
-    if (!title) {
-      return NextResponse.json(
-        { error: 'Title is required' },
-        { status: 400 }
-      );
+    const body = await request.json();
+    const parsed = validate(LifeEventSchema, body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
     }
 
-    const titleError = validateStringLength(title, 'title', 200);
-    if (titleError) return NextResponse.json({ error: titleError }, { status: 400 });
-    if (description) {
-      const descError = validateStringLength(description, 'description', 10000);
-      if (descError) return NextResponse.json({ error: descError }, { status: 400 });
-    }
+    const { title, description, date, endDate, period, category, emotions, interviewId } = parsed.data;
 
     const event = await prisma.lifeEvent.create({
       data: {
         userId: session.user.id,
         title,
-        description: description || '',
+        description: description ?? '',
         date: date ? new Date(date) : null,
-        period,
-        category,
-        emotions,
-        interviewId,
+        endDate: endDate ? new Date(endDate) : null,
+        period: period ?? null,
+        category: category ?? null,
+        emotions: emotions ?? null,
+        interviewId: interviewId ?? null,
       },
     });
 

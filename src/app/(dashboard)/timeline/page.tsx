@@ -5,6 +5,8 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useMemories } from '@/hooks/useMemories';
+import ErrorBanner from '@/components/ErrorBanner';
 
 interface Media {
   id: string;
@@ -19,6 +21,7 @@ interface LifeEvent {
   title: string;
   description: string;
   date: string | null;
+  endDate: string | null;
   period: string | null;
   category: string | null;
   emotions: string | null;
@@ -50,10 +53,7 @@ const CATEGORIES = [
 export default function TimelinePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [events, setEvents] = useState<LifeEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const filterPeriod = '';
-  const filterCategory = '';
+  const { memories: events, setMemories: setEvents, loading, error, extracting, reload, extract } = useMemories();
   const [viewMode, setViewMode] = useState<'timeline' | 'grid'>('timeline');
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
   const [selectedImage, setSelectedImage] = useState<{ url: string; title: string | null } | null>(null);
@@ -62,42 +62,26 @@ export default function TimelinePage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newMemoryTitle, setNewMemoryTitle] = useState('');
   const [addingMemory, setAddingMemory] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (status === 'loading') return;
-    if (!session) { router.push('/login'); return; }
-    syncAndFetch();
-  }, [session, status, router, filterPeriod, filterCategory]);
-
-  async function fetchEvents() {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (filterPeriod) params.set('period', filterPeriod);
-      if (filterCategory) params.set('category', filterCategory);
-      const response = await fetch(`/api/events?${params}`);
-      const data = await response.json();
-      setEvents(data.events || []);
-    } catch (error) {
-      console.error('Failed to fetch:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function syncAndFetch() {
-    try { await fetch('/api/interview/extract-all', { method: 'POST' }); } catch {}
-    await fetchEvents();
-  }
+    if (!session) router.push('/login');
+  }, [session, status, router]);
 
   async function deleteEvent(eventId: string) {
     if (!confirm('Delete this event?')) return;
+    // Optimistic update
+    setEvents(prev => prev.filter(e => e.id !== eventId));
     try {
-      await fetch(`/api/events/${eventId}`, { method: 'DELETE' });
-      setEvents(prev => prev.filter(e => e.id !== eventId));
-    } catch (error) {
-      console.error('Failed to delete:', error);
+      const res = await fetch(`/api/events/${eventId}`, { method: 'DELETE' });
+      if (!res.ok) {
+        // Revert on failure
+        reload();
+      }
+    } catch {
+      reload();
     }
   }
 
@@ -114,7 +98,7 @@ export default function TimelinePage() {
       });
 
       if (response.ok) {
-        fetchEvents();
+        reload();
       }
     } catch (error) {
       console.error('Upload failed:', error);
@@ -127,6 +111,7 @@ export default function TimelinePage() {
   async function addMemory() {
     if (!newMemoryTitle.trim()) return;
     setAddingMemory(true);
+    setAddError(null);
     try {
       const res = await fetch('/api/events', {
         method: 'POST',
@@ -136,10 +121,13 @@ export default function TimelinePage() {
       if (res.ok) {
         setNewMemoryTitle('');
         setShowAddForm(false);
-        fetchEvents();
+        reload();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setAddError(data.error || `Failed to add memory (${res.status})`);
       }
-    } catch (error) {
-      console.error('Failed to add memory:', error);
+    } catch {
+      setAddError('Network error — failed to add memory');
     } finally {
       setAddingMemory(false);
     }
@@ -154,10 +142,11 @@ export default function TimelinePage() {
     });
   }
 
+  const lifeEvents = events as LifeEvent[];
   const getPeriod = (id: string | null) => PERIODS.find(p => p.id === id);
   const getCategory = (id: string | null) => CATEGORIES.find(c => c.id === id);
-  const eventsByPeriod = PERIODS.map(p => ({ ...p, events: events.filter(e => e.period === p.id) })).filter(g => g.events.length > 0);
-  const totalPhotos = events.reduce((sum, e) => sum + e.media.length, 0);
+  const eventsByPeriod = PERIODS.map(p => ({ ...p, events: lifeEvents.filter(e => e.period === p.id) })).filter(g => g.events.length > 0);
+  const totalPhotos = lifeEvents.reduce((sum, e) => sum + (e.media?.length ?? 0), 0);
 
   if (status === 'loading') {
     return (
@@ -172,11 +161,21 @@ export default function TimelinePage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Error Banner */}
+      {(error || addError) && (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4">
+          <ErrorBanner
+            message={(error || addError)!}
+            onDismiss={error ? reload : () => setAddError(null)}
+          />
+        </div>
+      )}
+
       {/* Toolbar */}
       <header className="bg-white border-b border-slate-100 sticky top-14 z-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-sm text-slate-500">{events.length} events · {totalPhotos} photos</p>
+            <p className="text-sm text-slate-500">{lifeEvents.length} events · {totalPhotos} photos</p>
 
             <div className="flex flex-col items-end gap-2">
               <div className="flex bg-slate-100 rounded-lg p-1">
@@ -255,8 +254,8 @@ export default function TimelinePage() {
               Loading your timeline...
             </div>
           </div>
-        ) : events.length === 0 ? (
-          <EmptyState />
+        ) : lifeEvents.length === 0 ? (
+          <EmptyState onExtract={extract} extracting={extracting} />
         ) : viewMode === 'timeline' ? (
           <TimelineView
             eventsByPeriod={eventsByPeriod}
@@ -269,7 +268,7 @@ export default function TimelinePage() {
           />
         ) : (
           <GridView
-            events={events}
+            events={lifeEvents}
             expandedEvents={expandedEvents}
             toggleExpanded={toggleExpanded}
             deleteEvent={deleteEvent}
@@ -357,24 +356,12 @@ export default function TimelinePage() {
   );
 }
 
-function EmptyState() {
-  const [extracting, setExtracting] = useState(false);
+function EmptyState({ onExtract, extracting }: { onExtract: () => Promise<number>; extracting: boolean }) {
+  const [noResults, setNoResults] = useState(false);
 
   async function handleExtract() {
-    setExtracting(true);
-    try {
-      const res = await fetch('/api/interview/extract-all', { method: 'POST' });
-      const data = await res.json();
-      if (data.totalEvents > 0) {
-        window.location.reload();
-      } else {
-        alert(data.message || 'No memories found in past conversations');
-      }
-    } catch {
-      alert('Failed to extract');
-    } finally {
-      setExtracting(false);
-    }
+    const count = await onExtract();
+    if (count === 0) setNoResults(true);
   }
 
   return (
@@ -386,7 +373,9 @@ function EmptyState() {
       </div>
       <h2 className="text-2xl font-semibold text-slate-900 mb-3">No memories yet</h2>
       <p className="text-slate-500 mb-8 max-w-md mx-auto">
-        Chat with Bestie to capture your memories. They will appear here automatically.
+        {noResults
+          ? 'No memories found in past conversations. Start a chat with Bestie!'
+          : 'Chat with Bestie to capture your memories. They will appear here automatically.'}
       </p>
       <div className="flex flex-col items-center gap-3">
         <button
@@ -394,7 +383,12 @@ function EmptyState() {
           disabled={extracting}
           className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition font-medium disabled:opacity-50"
         >
-          {extracting ? 'Extracting...' : 'Extract from past conversations'}
+          {extracting ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Extracting...
+            </>
+          ) : 'Extract from past conversations'}
         </button>
         <Link
           href="/interview?new=true&context=memories"
@@ -517,7 +511,8 @@ function TimelineView({
                         <div className="flex flex-wrap items-center gap-2 mt-4 text-xs">
                           {event.date && (
                             <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded-md">
-                              {new Date(event.date).toLocaleDateString()}
+                              {new Date(event.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                              {event.endDate && ` – ${new Date(event.endDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`}
                             </span>
                           )}
                           {event.emotions && (
@@ -648,7 +643,8 @@ function GridView({
                 )}
                 {event.date && (
                   <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded-md">
-                    {new Date(event.date).toLocaleDateString()}
+                    {new Date(event.date).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    {event.endDate && ` – ${new Date(event.endDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`}
                   </span>
                 )}
               </div>

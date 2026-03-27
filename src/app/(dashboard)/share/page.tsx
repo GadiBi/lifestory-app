@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import ErrorBanner from '@/components/ErrorBanner';
 
 
 interface SharedStory {
@@ -35,6 +36,7 @@ export default function SharePage() {
   const [creating, setCreating] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -56,10 +58,11 @@ export default function SharePage() {
   async function fetchSharedStories() {
     try {
       const response = await fetch('/api/share');
+      if (!response.ok) throw new Error(`Failed to load shares: ${response.status}`);
       const data = await response.json();
       setSharedStories(data.sharedStories || []);
-    } catch (error) {
-      console.error('Failed to fetch:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load shares');
     } finally {
       setLoading(false);
     }
@@ -67,6 +70,7 @@ export default function SharePage() {
 
   async function createShare() {
     setCreating(true);
+    setError(null);
     try {
       const response = await fetch('/api/share', {
         method: 'POST',
@@ -79,14 +83,15 @@ export default function SharePage() {
           periods: selectedPeriods.length > 0 ? selectedPeriods : undefined,
         }),
       });
-
-      if (response.ok) {
-        fetchSharedStories();
-        setShowCreateModal(false);
-        resetForm();
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || `Failed to create share: ${response.status}`);
       }
-    } catch (error) {
-      console.error('Failed to create:', error);
+      fetchSharedStories();
+      setShowCreateModal(false);
+      resetForm();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create share');
     } finally {
       setCreating(false);
     }
@@ -94,11 +99,17 @@ export default function SharePage() {
 
   async function deleteShare(id: string) {
     if (!confirm('Delete this shared link? People with this link will no longer be able to view your story.')) return;
+    // Optimistic update
+    setSharedStories(prev => prev.filter(s => s.id !== id));
     try {
-      await fetch(`/api/share?id=${id}`, { method: 'DELETE' });
-      setSharedStories(prev => prev.filter(s => s.id !== id));
-    } catch (error) {
-      console.error('Failed to delete:', error);
+      const response = await fetch(`/api/share?id=${id}`, { method: 'DELETE' });
+      if (!response.ok) {
+        setError(`Failed to delete share: ${response.status}`);
+        fetchSharedStories(); // revert
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete share');
+      fetchSharedStories(); // revert
     }
   }
 
@@ -140,7 +151,7 @@ export default function SharePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
+      <header className="bg-white border-b border-slate-100 sticky top-14 z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 ml-14">
@@ -163,6 +174,11 @@ export default function SharePage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        {error && (
+          <div className="mb-4">
+            <ErrorBanner message={error} onDismiss={() => setError(null)} />
+          </div>
+        )}
         {sharedStories.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full flex items-center justify-center mx-auto mb-6">

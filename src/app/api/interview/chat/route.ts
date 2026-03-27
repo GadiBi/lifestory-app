@@ -414,6 +414,7 @@ export async function POST(request: Request) {
                     category: event.category || null,
                     emotions: event.emotions || null,
                     date: event.approximateDate ? tryParseDate(event.approximateDate) : null,
+                    endDate: event.approximateEndDate ? tryParseDate(event.approximateEndDate) : null,
                   },
                 });
               } catch (e) {

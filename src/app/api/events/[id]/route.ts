@@ -46,7 +46,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     }
 
     const { id } = await params;
-    const { title, description, date, period, category, emotions } = await request.json();
+    const { title, description, date, endDate, period, category, emotions } = await request.json();
 
     // Verify ownership
     const existingEvent = await prisma.lifeEvent.findFirst({
@@ -75,6 +75,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
         ...(date !== undefined && { date: date ? new Date(date) : null }),
+        ...(endDate !== undefined && { endDate: endDate ? new Date(endDate) : null }),
         ...(period !== undefined && { period }),
         ...(category !== undefined && { category }),
         ...(emotions !== undefined && { emotions }),
