@@ -511,7 +511,7 @@ export default function InterviewPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-56px)] bg-white flex flex-col">
+    <div className="bg-white flex flex-col" style={{ height: 'calc(100dvh - 56px)' }}>
       {/* Messages area */}
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 py-6">
