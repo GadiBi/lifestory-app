@@ -226,25 +226,6 @@ export default function Sidebar({ expanded, isMobile, onClose, onToggle, chatTit
         </div>
 
         <nav className="flex-1 flex flex-col items-center gap-1 py-2">
-          {/* Search icon */}
-          <div className="relative">
-            <button
-              onClick={() => navigate('/search')}
-              onMouseEnter={() => setHoveredItem('search')}
-              onMouseLeave={() => setHoveredItem(null)}
-              className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-            {hoveredItem === 'search' && (
-              <Tooltip label="Search" />
-            )}
-          </div>
-
-          <div className="w-6 my-1" />
-
           {NAV_ITEMS.map((item) => (
             <div key={item.id} className="relative">
               <button
