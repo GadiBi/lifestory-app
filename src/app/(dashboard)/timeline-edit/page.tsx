@@ -45,7 +45,7 @@ export default function TimelineEditPage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) { router.push('/login'); return; }
-    syncAndFetch();
+    fetchEntries();
   }, [session, status, router]);
 
   async function fetchEntries() {
@@ -58,11 +58,6 @@ export default function TimelineEditPage() {
     } finally {
       setLoading(false);
     }
-  }
-
-  async function syncAndFetch() {
-    try { await fetch('/api/interview/extract-all', { method: 'POST' }); } catch {}
-    await fetchEntries();
   }
 
   function resetForm() {

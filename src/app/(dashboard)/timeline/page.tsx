@@ -67,8 +67,8 @@ export default function TimelinePage() {
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) { router.push('/login'); return; }
-    syncAndFetch();
-  }, [session, status, router, filterPeriod, filterCategory]);
+    fetchEvents();
+  }, [session, status, router]);
 
   async function fetchEvents() {
     setLoading(true);
@@ -84,11 +84,6 @@ export default function TimelinePage() {
     } finally {
       setLoading(false);
     }
-  }
-
-  async function syncAndFetch() {
-    try { await fetch('/api/interview/extract-all', { method: 'POST' }); } catch {}
-    await fetchEvents();
   }
 
   async function deleteEvent(eventId: string) {
